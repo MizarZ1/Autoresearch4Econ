@@ -1,0 +1,25 @@
+# Local-only assignment files: never stage or upload to Gitea.
+/02_外部候选人/
+/2026-09-Agent-Harness题目.zip
+/2026-09-Agent+Quant题目.zip
+
+# Local sources, data, runtime artifacts, and downloaded papers.
+/local_reference/
+/examples/demo/data/
+/runs/
+/tmp/
+/output/
+/backups/
+
+# Credentials and machine-specific environments.
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
