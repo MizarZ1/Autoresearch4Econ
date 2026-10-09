@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-09T14:43:03.582881+00:00",
+  "endpoint": "https://api.deepseek.com",
+  "requested_model": "deepseek-chat",
+  "sdk_retries": 0,
+  "calls": [
+    {
+      "index": 1,
+      "start": 134160.393021125,
+      "status": "passed",
+      "returned_model": "deepseek-flash",
+      "action": {
+        "action": "finish",
+        "message": "ok"
+      },
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 50,
+        "total_tokens": 60,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 50
+      },
+      "end": 134161.832165541
+    },
+    {
+      "index": 2,
+      "start": 134161.832542458,
+      "status": "passed",
+      "returned_model": "deepseek-flash",
+      "action": {
+        "action": "finish",
+        "message": "ok"
+      },
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 50,
+        "total_tokens": 60,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 50
+      },
+      "end": 134162.173045416
+    },
+    {
+      "index": 3,
+      "start": 134161.834290458,
+      "status": "passed",
+      "returned_model": "deepseek-flash",
+      "action": {
+        "action": "finish",
+        "message": "ok"
+      },
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 50,
+        "total_tokens": 60,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cache_write_tokens": null,
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 50
+      },
+      "end": 134162.537780375
+    }
+  ],
+  "intervals_overlap": true,
+  "status": "passed"
+}

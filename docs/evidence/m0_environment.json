@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-10-09",
+  "timezone": "Asia/Shanghai",
+  "python": "3.11.15",
+  "os": "macOS 27.0.1 arm64",
+  "dependencies": {
+    "openai": "2.54.0",
+    "pydantic": "2.14.0",
+    "mcp": "1.30.0",
+    "mcp-stata": "3.3.0",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "ruff": "0.16.10",
+    "mypy": "1.20.2",
+    "pytest": "9.1.1",
+    "pytest-asyncio": "1.4.0"
+  },
+  "model_probe": "docs/evidence/model_probe.json",
+  "stata": {
+    "installed": "18.0.120",
+    "minimal_execution": "passed",
+    "MP": 1,
+    "independent_ajr_reference": "passed",
+    "mcp_protocol_isolation": "passed in regression test and observed live results",
+    "mcp_full_probe": "failed; native worker crash during IV execution",
+    "cancel_task_state": "observed Operation cancelled, insufficient to establish stopped computation",
+    "hard_stop_probe": "pending"
+  },
+  "gitea": {
+    "version": "1.27.1",
+    "default_branch": "main",
+    "git_read": "passed",
+    "git_write": "passed; main baseline pushed",
+    "permissions": {
+      "pull": true,
+      "push": true,
+      "admin": true
+    },
+    "actions_enabled": true,
+    "global_runner": {
+      "name": "lab404Runner",
+      "status": "offline",
+      "labels": [
+        "ubuntu-latest",
+        "ubuntu-22.04",
+        "ubuntu-20.04"
+      ]
+    },
+    "repository_runner_count": 0,
+    "branch_protections": [],
+    "pr": "pending",
+    "ci": "not passed; runner offline"
+  },
+  "offline_gate": {
+    "status": "passed",
+    "tests": 13,
+    "clean_locked_install": "passed"
+  },
+  "overall": "in_progress"
+}

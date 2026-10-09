@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "server_version": "3.3.0",
+  "status": "partial observation; not complete integration acceptance",
+  "source": "Live MCP tool response on 2026-10-09",
+  "data_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+  "e": {
+    "kappa": 1.0,
+    "rss": 55.75864313707055,
+    "N": 64.0,
+    "df_m": 1.0,
+    "df_r": 62.0,
+    "rmse": 0.948331668681226,
+    "mss": 12.823075361643262,
+    "r2": 0.18697512460093502,
+    "r2_a": 0.17386182015901464,
+    "F": 36.3941058971672,
+    "iterations": 0.0,
+    "rank": 2.0,
+    "cmdline": "ivregress 2sls logpgp95 (avexpr=logem4) if baseco==1, small",
+    "_r_z_abs__CL": "|t|",
+    "_r_z__CL": "t",
+    "cmd": "ivregress",
+    "estat_cmd": "ivregress_estat",
+    "robust_epilog": "ivregress_epilog",
+    "robust_prolog": "ivregress_prolog",
+    "vce": "unadjusted",
+    "estimator": "2sls",
+    "footnote": "ivreg_footnote",
+    "marginsprop": "nolinearize",
+    "marginsnotok": "Residuals SCores",
+    "marginsok": "XB default",
+    "predict": "ivregress_p",
+    "depvar": "logpgp95",
+    "exog": "logem4",
+    "endog": "avexpr",
+    "insts": "logem4",
+    "instd": "avexpr",
+    "small": "small",
+    "title": "Instrumental variables 2SLS regression",
+    "properties": "b V",
+    "_matrices": {
+      "b": {
+        "rows": 1,
+        "cols": 2,
+        "truncated": false,
+        "values": [
+          [
+            0.9442793851547995,
+            1.9096665405467377
+          ]
+        ]
+      },
+      "V": {
+        "rows": 2,
+        "cols": 2,
+        "truncated": false,
+        "values": [
+          [
+            0.024500218792233887,
+            -0.1596342383419602
+          ],
+          [
+            -0.1596342383419602,
+            1.0541689133843817
+          ]
+        ]
+      }
+    }
+  }
+}

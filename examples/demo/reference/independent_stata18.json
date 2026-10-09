@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-10-09T15:09:47.780291+00:00",
+  "provenance": "Independent developer-authored do-file, no model, no MCP",
+  "data_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+  "reference_code_sha256": "983407036f8a3f1707fba3c7658993c2de5d76ce83882ebdda1ba37e235b764d",
+  "stata": {
+    "version": "18",
+    "flavor": "IC",
+    "MP": 1.0,
+    "SE": 1.0
+  },
+  "inference": "Homoskedastic conventional SE; finite-sample df correction; ivregress small",
+  "legacy_modern_match": true,
+  "estimates": [
+    {
+      "specification": "baseline",
+      "estimator": "ols",
+      "parameter": "avexpr",
+      "n": "64",
+      "coefficient": ".522107029724591",
+      "standard_error": ".0611850385365589",
+      "df_r": "62",
+      "r2": ".540114955312099"
+    },
+    {
+      "specification": "baseline",
+      "estimator": "ols",
+      "parameter": "_cons",
+      "n": "64",
+      "coefficient": "4.66038329861484",
+      "standard_error": ".408506214899087",
+      "df_r": "62",
+      "r2": ".540114955312099"
+    },
+    {
+      "specification": "baseline",
+      "estimator": "ivreg",
+      "parameter": "avexpr",
+      "n": "64",
+      "coefficient": ".944279385154799",
+      "standard_error": ".156525457329579",
+      "df_r": "62",
+      "r2": ".186975124600935"
+    },
+    {
+      "specification": "baseline",
+      "estimator": "ivreg",
+      "parameter": "_cons",
+      "n": "64",
+      "coefficient": "1.90966654054674",
+      "standard_error": "1.02672728286745",
+      "df_r": "62",
+      "r2": ".186975124600935"
+    },
+    {
+      "specification": "baseline",
+      "estimator": "ivregress",
+      "parameter": "avexpr",
+      "n": "64",
+      "coefficient": ".944279385154799",
+      "standard_error": ".156525457329579",
+      "df_r": "62",
+      "r2": ".186975124600935"
+    },
+    {
+      "specification": "baseline",
+      "estimator": "ivregress",
+      "parameter": "_cons",
+      "n": "64",
+      "coefficient": "1.90966654054674",
+      "standard_error": "1.02672728286745",
+      "df_r": "62",
+      "r2": ".186975124600935"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ols",
+      "parameter": "avexpr",
+      "n": "64",
+      "coefficient": ".467887063834988",
+      "standard_error": ".0641642453206737",
+      "df_r": "61",
+      "r2": ".574492946643295"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ols",
+      "parameter": "lat_abst",
+      "n": "64",
+      "coefficient": "1.57688396170568",
+      "standard_error": ".710310036877261",
+      "df_r": "61",
+      "r2": ".574492946643295"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ols",
+      "parameter": "_cons",
+      "n": "64",
+      "coefficient": "4.72808219288227",
+      "standard_error": ".397320794595895",
+      "df_r": "61",
+      "r2": ".574492946643295"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ivreg",
+      "parameter": "avexpr",
+      "n": "64",
+      "coefficient": ".995704032362436",
+      "standard_error": ".221681600352082",
+      "df_r": "61",
+      "r2": ".102476160720482"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ivreg",
+      "parameter": "lat_abst",
+      "n": "64",
+      "coefficient": "-.647207145621473",
+      "standard_error": "1.33514093064459",
+      "df_r": "61",
+      "r2": ".102476160720482"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ivreg",
+      "parameter": "_cons",
+      "n": "64",
+      "coefficient": "1.69181383729683",
+      "standard_error": "1.29298510246965",
+      "df_r": "61",
+      "r2": ".102476160720482"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ivregress",
+      "parameter": "avexpr",
+      "n": "64",
+      "coefficient": ".995704032362436",
+      "standard_error": ".221681600352082",
+      "df_r": "61",
+      "r2": ".102476160720482"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ivregress",
+      "parameter": "lat_abst",
+      "n": "64",
+      "coefficient": "-.647207145621473",
+      "standard_error": "1.33514093064459",
+      "df_r": "61",
+      "r2": ".102476160720482"
+    },
+    {
+      "specification": "latitude",
+      "estimator": "ivregress",
+      "parameter": "_cons",
+      "n": "64",
+      "coefficient": "1.69181383729683",
+      "standard_error": "1.29298510246965",
+      "df_r": "61",
+      "r2": ".102476160720482"
+    }
+  ],
+  "first_stage_diagnostics": [
+    {
+      "specification": "baseline",
+      "n": "64",
+      "instrument_coefficient": "-.606778248833894",
+      "instrument_se": ".126668600227439",
+      "excluded_instrument_f": "22.9467965870538",
+      "df_den": "62"
+    },
+    {
+      "specification": "latitude",
+      "n": "64",
+      "instrument_coefficient": "-.510268054580947",
+      "instrument_se": ".141018564768973",
+      "excluded_instrument_f": "13.0931510939872",
+      "df_den": "61"
+    }
+  ],
+  "original_data_unchanged": true
+}
