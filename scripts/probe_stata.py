@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 import os
+import plistlib
 import sys
 import time
 import traceback
@@ -44,6 +45,18 @@ async def main() -> int:
         MCP_STATA_LOGLEVEL="WARNING",
         MCP_STATA_ALLOWED_ROOTS=str(ROOT),
     )
+    executable = Path(child_env["STATA_PATH"])
+    library = executable.with_name("libstata-mp.dylib")
+    metadata = executable.parent.parent / "Info.plist"
+    if library.is_file() and metadata.is_file():
+        record["stata_runtime"] = {
+            "bundle_version": plistlib.loads(metadata.read_bytes())["CFBundleVersion"],
+            "library_sha256": hashlib.sha256(library.read_bytes()).hexdigest(),
+        }
+    record["probe_code_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    record["launcher_code_sha256"] = hashlib.sha256(
+        (ROOT / "src/econ_agent/stata_transport.py").read_bytes()
+    ).hexdigest()
     parameters = StdioServerParameters(
         command=sys.executable, args=["-m", "econ_agent.stata_transport"], env=child_env
     )
@@ -97,16 +110,21 @@ async def main() -> int:
                 await call("stata_manage_session", {"action": "create"})
                 data = ROOT / "examples/demo/data/maketable4.dta"
                 before = hashlib.sha256(data.read_bytes()).hexdigest()
+                analysis_file = OUTPUT / "analysis.do"
+                analysis_file.write_text(
+                    f'set more off\nset processors 1\nuse "{data}", clear\n'
+                    "ivregress 2sls logpgp95 (avexpr=logem4) if baseco==1, small\n"
+                    "display e(N)\n"
+                )
                 analysis = await call(
                     "stata_run",
                     {
-                        "code": f'set more off\nuse "{data}", clear\n'
-                        "ivregress 2sls logpgp95 (avexpr=logem4) if baseco==1, small\n"
-                        "display e(N)",
+                        "code": str(analysis_file),
+                        "is_file": True,
                         "echo": False,
                     },
                 )
-                assert analysis["success"]
+                assert analysis["success"] and analysis["data"]["rc"] == 0
                 estimated = await call("stata_get_results", {})
                 (OUTPUT / "mcp_ajr_results.json").write_text(json.dumps(estimated, indent=2) + "\n")
                 state = estimated["data"]["e"]
@@ -138,6 +156,7 @@ async def main() -> int:
                 assert record["ajr_sample_size"] == 64
                 help_result = await call("stata_get_help", {"topic": "ivregress"})
                 record["help_success"] = help_result["success"]
+                assert record["help_success"]
                 # A real CPU loop; cancellation must interrupt execution before its sentinel.
                 await call("stata_manage_session", {"action": "stop"})
                 active_session = "cancel"
@@ -203,9 +222,13 @@ async def main() -> int:
                 record["fresh_session_responds"] = fresh["success"]
                 assert fresh["success"]
                 record["input_unchanged"] = hashlib.sha256(data.read_bytes()).hexdigest() == before
+                assert record["input_unchanged"]
                 await call("stata_manage_session", {"action": "stop"})
     record["status"] = "passed"
     record["session_strategy"] = "fresh dedicated worker for each execution attempt"
+    record["analysis_input"] = "saved do-file through stata_run is_file=true"
+    record["finished_at"] = datetime.now(UTC).isoformat()
+    (OUTPUT / "probe.json").write_text(json.dumps(record, indent=2) + "\n")
     (ROOT / "local_reference/m0/stata_probe.json").write_text(json.dumps(record, indent=2) + "\n")
     print(json.dumps(record, indent=2))
     return 0

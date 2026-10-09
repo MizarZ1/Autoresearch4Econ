@@ -27,6 +27,19 @@ documents environment variable names; this version does not automatically load
 
 ## Explicit live verification
 
+On this development machine, verification uses the updated, licensed Stata copy
+under ignored `local_reference/stata18/` (bundle 18.0.185). From the project root:
+
+```sh
+export ECON_AGENT_STATA_HOME="$PWD/local_reference/stata18"
+export STATA_PATH="$ECON_AGENT_STATA_HOME/StataMP.app/Contents/MacOS/stata-mp"
+```
+
+These paths are local configuration, not distributed binaries. Other machines
+must provide their own compatible licensed installation and set both variables.
+The original `/Applications/Stata` installation remains at 18.0.120. See the
+validation record for the exact update source and verified compatibility limits.
+
 ```sh
 uv run --locked --extra stata --group dev python scripts/fetch_ajr.py
 uv run --locked --extra stata --group dev python scripts/reference_ajr.py
@@ -46,6 +59,13 @@ model or MCP, to provide an independent numerical reference. It compares legacy
 `ivreg` with `ivregress 2sls, small`, checks sample size and input hash, and writes
 sanitized numerical output to `examples/demo/reference/`. Homoskedastic standard
 errors and finite-sample degrees of freedom are deliberate replication choices.
+
+The verified MCP path executes saved `.do` files in dedicated sessions and sets
+`processors 1` on this Stata/MP runtime. Inline multiline IV and the unrestricted
+processor configuration showed native worker crashes, including after the
+update, and are not accepted analysis paths. Cancellation stops the task and its
+session, verifies worker exit, then creates a fresh session; task status alone
+does not establish that the underlying computation stopped.
 
 The demo task reads only the dataset, the project-authored variable dictionary
 and background. The `reference/` directory and authors' original code are for

@@ -23,9 +23,16 @@
     "MP": 1,
     "independent_ajr_reference": "passed",
     "mcp_protocol_isolation": "passed in regression test and observed live results",
-    "mcp_full_probe": "failed; native worker crash during IV execution",
-    "cancel_task_state": "observed Operation cancelled, insufficient to establish stopped computation",
-    "hard_stop_probe": "pending"
+    "mcp_full_probe": "passed 3 consecutive probes with saved do-files, processors 1 and fresh dedicated sessions",
+    "cancel_task_state": "cancelled state observed after actual computation started",
+    "hard_stop_probe": "passed; worker PID absent; fresh session responds",
+    "verified_copy": "local_reference/stata18",
+    "verified_bundle": "18.0.185",
+    "original_installation_unchanged": true,
+    "inline_multiline_execution": "not accepted; native crashes observed even after official update",
+    "evidence": "docs/evidence/stata_probe.json",
+    "update_archive_sha256": "c07d3fadb52bbf1721f879eac02fe3d93e06f0e624da8be9a9431c930c70073c",
+    "unrestricted_processors": "not accepted; saved do-file native failure observed"
   },
   "gitea": {
     "version": "1.27.1",
@@ -48,14 +55,32 @@
       ]
     },
     "repository_runner_count": 0,
-    "branch_protections": [],
-    "pr": "pending",
-    "ci": "not passed; runner offline"
+    "branch_protections": [
+      {
+        "rule_name": "main",
+        "enable_push": false,
+        "enable_force_push": false,
+        "enable_status_check": false,
+        "required_approvals": 0
+      }
+    ],
+    "pr": {
+      "number": 1,
+      "url": "http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/1",
+      "draft": true,
+      "review": "self-reviewed; independent review pending",
+      "attachment": "Desktop artifact attachment rejected this Gitea URL; ordinary URL retained"
+    },
+    "ci": {
+      "status": "queued",
+      "run_url": "http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/actions/runs/766",
+      "observed_head": "fd1c741cc217c7e8917d7ff250c6ef6b75a528c7"
+    }
   },
   "offline_gate": {
     "status": "passed",
     "tests": 13,
     "clean_locked_install": "passed"
   },
-  "overall": "in_progress"
+  "overall": "local_stage0_complete_remote_ci_and_independent_review_pending"
 }

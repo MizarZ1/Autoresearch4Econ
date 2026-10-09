@@ -23,8 +23,10 @@ must never determine reference answers or claim mock computations were real.
 
 Cancellation must include evidence that the underlying Stata execution ended.
 The Stata 18 runtime lacks the `sfi.breakIn` hook expected by the pinned server;
-a cancelled background task alone is insufficient. Stage 0 probes attempt the
+a cancelled background task alone is insufficient. Stage 0 probes verified the
 hard-stop strategy: cancel the task, terminate its MCP session, confirm the worker
-has exited, then start a fresh session. Full live acceptance is still pending; see
-M0_VALIDATION.md. Stage 2 must carry the verified behavior into the
+has exited, then start a fresh session. The accepted analysis path uses saved
+do-files, `set processors 1`, and the updated local Stata copy. Inline multiline
+analysis and unrestricted processors can still crash. See M0_VALIDATION.md.
+Stage 2 must carry the verified behavior into the
 AnalysisBackend cancellation contract and reject late/cancelled results.

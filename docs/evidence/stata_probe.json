@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-09T15:34:03.348449+00:00",
+  "calls": [
+    {
+      "index": 1,
+      "tool": "stata_run",
+      "success": true,
+      "duration_seconds": 0.41065491701010615
+    },
+    {
+      "index": 2,
+      "tool": "stata_get_results",
+      "success": true,
+      "duration_seconds": 0.017831250006565824
+    },
+    {
+      "index": 3,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 0.01376687502488494
+    },
+    {
+      "index": 4,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 1.242904291022569
+    },
+    {
+      "index": 5,
+      "tool": "stata_run",
+      "success": true,
+      "duration_seconds": 0.4040739579941146
+    },
+    {
+      "index": 6,
+      "tool": "stata_get_results",
+      "success": true,
+      "duration_seconds": 0.017514290986582637
+    },
+    {
+      "index": 7,
+      "tool": "stata_get_help",
+      "success": true,
+      "duration_seconds": 0.015312167000956833
+    },
+    {
+      "index": 8,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 0.016976875020191073
+    },
+    {
+      "index": 9,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 1.1628248750057537
+    },
+    {
+      "index": 10,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 0.011295999982394278
+    },
+    {
+      "index": 11,
+      "tool": "stata_run",
+      "success": true,
+      "duration_seconds": 0.02216891699936241
+    },
+    {
+      "index": 12,
+      "tool": "stata_task_status",
+      "success": true,
+      "duration_seconds": 0.01110341600724496
+    },
+    {
+      "index": 13,
+      "tool": "stata_control",
+      "success": true,
+      "duration_seconds": 0.011071916989749297
+    },
+    {
+      "index": 14,
+      "tool": "stata_task_status",
+      "success": false,
+      "duration_seconds": 0.011135167005704716
+    },
+    {
+      "index": 15,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 5.016061250003986
+    },
+    {
+      "index": 16,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 1.26399095801753
+    },
+    {
+      "index": 17,
+      "tool": "stata_run",
+      "success": true,
+      "duration_seconds": 0.38314708301913925
+    },
+    {
+      "index": 18,
+      "tool": "stata_manage_session",
+      "success": true,
+      "duration_seconds": 0.016355583007680252
+    }
+  ],
+  "status": "passed",
+  "stata_runtime": {
+    "bundle_version": "18.0.185",
+    "library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+  },
+  "probe_code_sha256": "3fca4bebc73ba76bdbf1c8cbbc53daf1cf4ccde5a617472d24c2c45fbaa0abee",
+  "launcher_code_sha256": "863586211127ef9b05af648b123517d97191ce60cb004cd704723998253c1ac0",
+  "server": {
+    "name": "mcp-stata",
+    "title": null,
+    "version": "3.3.0",
+    "websiteUrl": null,
+    "icons": null
+  },
+  "tools": [
+    "stata_manage_session",
+    "stata_load_data",
+    "stata_task_status",
+    "stata_control",
+    "stata_run",
+    "stata_read_log",
+    "stata_inspect_data",
+    "stata_manage_graphs",
+    "stata_get_results",
+    "stata_get_help",
+    "stata_research_audit",
+    "stata_estimation_plan",
+    "stata_compare_specs",
+    "stata_publication_check",
+    "stata_project_reproducibility_report",
+    "stata_doctor",
+    "stata_run_tests",
+    "stata_run_test",
+    "stata_discover_tests",
+    "stata_get_test_results"
+  ],
+  "minimal_mean": 2.5,
+  "ajr_reference_match": true,
+  "ajr_coefficient": 0.9442793851547995,
+  "ajr_standard_error": 0.1565254573295791,
+  "ajr_sample_size": 64.0,
+  "help_success": true,
+  "computation_started_before_cancel": true,
+  "cancel_status": "failed",
+  "cancel_error": "Operation cancelled",
+  "worker_process_terminated": true,
+  "cancellation_strategy": "cancel task, then stop session and verify worker exit",
+  "soft_cancel_supported": false,
+  "fresh_session_responds": true,
+  "input_unchanged": true,
+  "session_strategy": "fresh dedicated worker for each execution attempt",
+  "analysis_input": "saved do-file through stata_run is_file=true",
+  "finished_at": "2026-10-09T15:34:15.352042+00:00",
+  "configured_stata_processors": 1,
+  "repeat_runs": [
+    {
+      "started_at": "2026-10-09T15:33:02.991123+00:00",
+      "finished_at": "2026-10-09T15:33:14.958941+00:00",
+      "status": "passed",
+      "ajr_reference_match": true,
+      "worker_process_terminated": true,
+      "fresh_session_responds": true,
+      "input_unchanged": true
+    },
+    {
+      "started_at": "2026-10-09T15:33:51.206185+00:00",
+      "finished_at": "2026-10-09T15:34:03.159387+00:00",
+      "status": "passed",
+      "ajr_reference_match": true,
+      "worker_process_terminated": true,
+      "fresh_session_responds": true,
+      "input_unchanged": true
+    },
+    {
+      "started_at": "2026-10-09T15:34:03.348449+00:00",
+      "finished_at": "2026-10-09T15:34:15.352042+00:00",
+      "status": "passed",
+      "ajr_reference_match": true,
+      "worker_process_terminated": true,
+      "fresh_session_responds": true,
+      "input_unchanged": true
+    }
+  ],
+  "limitations": [
+    "Inline multiline IV execution can crash",
+    "Unrestricted processors also showed native failure with a saved do-file",
+    "Soft cancellation unsupported: stop dedicated session and verify process exit",
+    "Three repeat probes cover this AJR baseline and lifecycle only; broader method validation is later M1 work"
+  ]
+}
