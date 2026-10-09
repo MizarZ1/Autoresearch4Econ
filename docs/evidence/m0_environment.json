@@ -73,8 +73,10 @@
     },
     "ci": {
       "status": "queued",
-      "run_url": "http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/actions/runs/766",
-      "observed_head": "fd1c741cc217c7e8917d7ff250c6ef6b75a528c7"
+      "run_url": "http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/actions/runs/768",
+      "observed_head": "0fe80ecf092d171dbbc537234f2a61af7a62ea5b",
+      "observed_at": "2026-10-09T15:36:39.986371+00:00",
+      "note": "Snapshot for integration-verified code commit; subsequent status-documentation commit is not covered by this CI run"
     }
   },
   "offline_gate": {
@@ -82,5 +84,6 @@
     "tests": 13,
     "clean_locked_install": "passed"
   },
-  "overall": "local_stage0_complete_remote_ci_and_independent_review_pending"
+  "overall": "local_stage0_complete_remote_ci_and_independent_review_pending",
+  "integration_verified_commit": "0fe80ecf092d171dbbc537234f2a61af7a62ea5b"
 }

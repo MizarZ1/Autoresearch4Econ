@@ -63,8 +63,9 @@ Stata 18 本地 SFI 不提供服务尝试调用的 `breakIn`。`stata_control ca
 [草稿 PR #1](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/1)
 为 `feat/cli-agent` → `main`。`main` 禁止直接推送及强推；runner 离线时，
 未将尚未验证的 status context 设为必需检查。
-[已检查的 PR CI](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/actions/runs/766)
-为 queued，不能记作通过；新提交的 CI 状态单独写入 JSON 摘要。
+[已检查的 PR CI](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/actions/runs/768)
+验证代码提交 `0fe80ec` 的实际状态为 queued，不能记作通过。
+JSON 摘要记录了该提交的观察时间；之后的状态文档提交不由该 CI run 覆盖。
 独立审查尚未执行，无平台 approval。桌面附件工具拒绝该 Gitea PR URL，
 文档保留普通链接。
 
