@@ -86,11 +86,12 @@ macOS/Linux，不宣称支持 Windows。对象格式、数据库格式、应用�
 互斥锁覆盖执行、主返回读取、提取、工作进程停止核对及归档，避免返回值串用。
 原件或快照改变时暂停，不自动覆盖用户文件。该措施不构成强文件访问沙箱。
 
-通用 Stata 命令均可执行和保存原始 e()/r()/s()、日志及输出，未注册规范化规则
-时结果保持空值。当前已实现 `ivregress 2sls, small` 的常规协方差提取规则：
-具名参数、系数和标准误与原始矩阵核对，p 值及 95% 区间由 Stata 按实际自由度
-计算，并核对变量、样本和当前确认设计。其他方法先显示本机命令可用性，不能
-将 `which` 成功认定为数值已验证。方法能力分别披露规范化范围和验证状态。
+通用 Stata 命令可执行并归档原始返回、日志及输出；未注册规则时不强行生成
+规范化结果。已接入 2SLS（small、常规协方差）、具名满秩线性回归、两组两期
+重复截面 DiD、锐断点局部线性 RDD、二元 Logit，以及单变量描述统计。
+具体规格及验证边界见[方法清单](docs/METHODS.md)。可用性、规范化支持与
+数值验证分别显示；`which` 成功不等于已验证。验证记录只对匹配的本机
+Stata 构建、库 hash、MCP 版本与映射代码生效。
 
 显式运行阶段 2 验收，不调用模型 API，也不下载 Stata 更新包：
 
@@ -328,3 +329,31 @@ POSIX 启动器 `econ_agent.stata_transport` 分离原生 stdout 和 MCP 协议�
 第三方服务。[M0 验收记录](docs/M0_VALIDATION.md)、[AJR 验收卡](examples/demo/reference/acceptance.json)、
 [独立参考](examples/demo/reference/independent_stata18.json)和[开发计划](docs/DEVELOPMENT_PLAN.md)
 分别记录本地验证、真实环境及远端状态。交付通过草稿 PR 审阅，默认不自动合并。
+
+
+## 阶段 7 与 M1 首版交付
+
+优先方法组使用各自适合的数据：AJR 用于真实 IV 闭环，其余代表方法使用
+自编合成夹具，均真实运行 Stata 并核对独立数值参考。RDD 使用内置 `regress`
+估计预定带宽的锐断点局部线性模型；本机 `rdrobust` 不可用，未下载或冒称验证。
+Logit 返回对数优势系数，不能称为概率边际效应。描述统计即时保存 r() 快照，
+均值、样本标准差和极值可进入证据表与只读复现包。
+
+```sh
+uv run --locked --extra stata --group dev python scripts/validate_stage7.py
+uv run --locked --extra stata --group dev python scripts/validate_stage6.py \
+  --evidence-prefix stage7_ajr
+econ-agent doctor --backend stata --probe-stata --json
+python scripts/check.py
+```
+
+首个命令不调用模型，第二个使用现有 DeepSeek 配置并保存新的首版 AJR 记录，
+不覆盖阶段六历史证据。复用用户原始授权“你自行选择最优”，程序选择最小
+工程样本变化；版本确认仍是开发脚本操作，独立研究者审阅状态单列。
+脚本按当前请求 ID/hash 确认设计，遇到错误保留记录、预算与成功分析。
+普通 resume 不清空连续错误上限；新的明确接受答复可以开启下一段有界尝试，
+并记录确切请求，累计预算和同一 attempt 重试上限不变。
+
+[阶段 7 验收与首版逐项清单](docs/STAGE7_VALIDATION.md)汇总代码、离线检查、
+真实运行、独立审查、CI 和合并状态。研究结果的并发模型审阅不等于独立 PR
+审查。M1 交付可审阅草稿 PR；Python 分析模式属于另行授权的 M2。
