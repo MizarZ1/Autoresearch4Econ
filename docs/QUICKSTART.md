@@ -6,7 +6,7 @@
 
 准备 Python 3.11、uv（构建验证使用 0.12.3）、已有合法许可的 Stata 与 OpenAI-compatible 模型账号。首次安装依赖需要访问 Python 包源；交付包未携带第三方依赖 wheel，不能称为离线安装包。已有缓存时可以使用 `--offline`。
 
-解压 `demoV0.1-test-delivery.zip`，进入 `demoV0.1-test/`。先用附件 `SHA256SUMS` 校验下载文件，例如 macOS 上运行 `shasum -a 256 -c SHA256SUMS`。
+先在下载目录校验附件。若只下载交付 zip，在 macOS 上运行 `shasum -a 256 demoV0.1-test-delivery.zip`，与附件 `SHA256SUMS` 中同名文件的值比对；若下载了清单中全部六个附件，可在下载目录运行 `shasum -a 256 -c SHA256SUMS`。校验后解压 `demoV0.1-test-delivery.zip`，进入 `demoV0.1-test/`。
 
 按锁文件安装源码（包含 Stata 连接；开发工具另加 `--group dev`）：
 
