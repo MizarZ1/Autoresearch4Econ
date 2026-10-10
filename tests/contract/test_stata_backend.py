@@ -90,7 +90,8 @@ class FakeTransport:
                     if self.mode != "missing_table":
                         (output / "coefficients.csv").write_text(
                             "parameter,coefficient,standard_error,p_value,lower,upper,df,n\n"
-                            "x,1,1,0.3,-3,5,2,2\n_cons,2,2,0.3,-6,10,2,2\n"
+                            "x,1,1,0.4226497308103743,-3.302652729911275,5.302652729911275,2,4\n"
+                            "_cons,2,2,0.4226497308103743,-6.60530545982255,10.60530545982255,2,4\n"
                         )
                         (output / "sample_check.txt").write_text(
                             "0" if self.mode == "sample_mismatch" else "1"
@@ -139,7 +140,8 @@ class FakeTransport:
                     "small": "small",
                     "vce": "unadjusted",
                     "df_r": 2,
-                    "N": 2,
+                    "N": 4,
+                    "rank": 2,
                     "depvar": "y",
                     "endog": "x",
                     "insts": "z",
@@ -172,7 +174,7 @@ def setup_backend(
     tmp_path: Path,
 ) -> Iterator[tuple[RunStore, StataBackend, FakeTransport, ExperimentSpec, StataProgram]]:
     source = tmp_path / "source.csv"
-    source.write_text("y,x,z,group\n1,2,3,1\n2,3,4,1\n")
+    source.write_text("y,x,z,group\n1,2,3,1\n2,3,4,1\n3,4,6,1\n4,5,8,1\n")
     store = RunStore.create(
         tmp_path / "runs", ResearchTask(data_path=source, research_goal="仅供离线后端契约测试")
     )
@@ -180,7 +182,7 @@ def setup_backend(
     store.transition_run(RunStatus.RUNNING)
     design = store.create_design(
         DesignContent(
-            population="两行合成数据",
+            population="四行合成数据",
             variables={"y": "测试因变量", "x": "测试内生变量", "z": "测试工具"},
             sample_rule="group==1",
             estimand="合成结构检查",
@@ -267,6 +269,44 @@ async def test_full_operation_archives_and_reextracts_without_mcp(
     with RunStore.open(directory) as reopened:
         assert not reopened.recovery_report.issues
         assert reopened.attempt(identifier).execution_status == ExecutionStatus.SUCCEEDED
+
+
+@pytest.mark.parametrize(
+    "fault", ["p_value", "lower", "upper", "rank", "missing_rank", "df", "matrix"]
+)
+async def test_iv_inference_and_matrix_corruption_are_rejected(
+    setup_backend: BackendFixture, fault: str
+) -> None:
+    import csv
+    import io
+
+    from econ_agent.stata_results import extract_iv
+
+    store, backend, _, spec, program = setup_backend
+    outcome = await backend.run_analysis(spec, attempt_id=attempt(store, spec), program=program)
+    payload = json.loads(store.read_artifact(outcome.result.raw_artifact_ids[0]))
+    raw = payload["stored"]
+    text = store.read_artifact(payload["files"]["coefficients.csv"]).decode()
+    if fault in {"p_value", "lower", "upper"}:
+        reader = csv.DictReader(io.StringIO(text))
+        rows = list(reader)
+        rows[0][fault] = "0.8" if fault == "p_value" else "100"
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=reader.fieldnames or [])
+        writer.writeheader()
+        writer.writerows(rows)
+        text = output.getvalue()
+    elif fault == "rank":
+        raw["data"]["e"]["rank"] = 1
+    elif fault == "missing_rank":
+        raw["data"]["e"].pop("rank")
+    elif fault == "df":
+        raw["data"]["e"]["N"] = 2
+    else:
+        raw["data"]["e"]["_matrices"]["V"]["values"][0][1] = 1
+    assert program.iv
+    with pytest.raises(ValueError):
+        extract_iv(raw, text, spec, program.iv)
 
 
 @pytest.mark.parametrize("mode", ["bad_matrix", "missing_table", "float_rounding"])

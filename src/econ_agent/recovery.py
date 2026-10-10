@@ -48,7 +48,7 @@ async def reconcile_interrupted(
         if needs_worker:
             artifact = records.get(call.tool_call_id)
             if artifact is None:
-                # 从未登记派发意图的待运行分析可以确认未启动，其他情况保持暂停。
+                # 派发意图先于进程创建持久化；无意图的查询同样可以确认未启动。
                 if (
                     attempt
                     and not attempt.backend_task_id
@@ -56,6 +56,13 @@ async def reconcile_interrupted(
                     and attempt.executor_id is None
                 ):
                     store.confirm_interrupted_stopped(attempt.attempt_id)
+                elif attempt is None and call.tool_call_id not in intents:
+                    store.archive_bytes(
+                        f"calls/recovery/{call.tool_call_id}/{new_id('check')}.json",
+                        json.dumps({"schema_version": 1, "outcome": "never_dispatched"}).encode(),
+                        kind="tool_response",
+                        tool_call_id=call.tool_call_id,
+                    )
                 else:
                     issues.append("遗留统计工具缺少可核对的工作进程身份：" + call.tool_call_id)
                     continue

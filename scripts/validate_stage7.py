@@ -1,5 +1,6 @@
 """显式真实方法验收：独立原生参考、生产 MCP 映射和迁移后的复现包。"""
 
+import argparse
 import asyncio
 import csv
 import hashlib
@@ -263,6 +264,7 @@ def mapping_hashes() -> dict[str, str]:
         "stata_methods.py",
         "stata_backend.py",
         "harness.py",
+        "inference.py",
     )
     return {
         name: hashlib.sha256((ROOT / "src/econ_agent" / name).read_bytes()).hexdigest()
@@ -270,7 +272,7 @@ def mapping_hashes() -> dict[str, str]:
     }
 
 
-def write_registry(record: dict[str, Any]) -> None:
+def write_registry(record: dict[str, Any], evidence_name: str = "stage7_methods") -> None:
     proof = {
         "schema_version": 1,
         "environment": record["cases"]["linear"]["environment"],
@@ -297,6 +299,21 @@ def write_registry(record: dict[str, Any]) -> None:
             for name, case in record["cases"].items()
         },
     }
+    iv_path = ROOT / "docs/evidence/demo_v01_iv.json"
+    if evidence_name == "demo_v01_methods" and iv_path.is_file():
+        iv = json.loads(iv_path.read_text())
+        if (
+            iv.get("status") == "passed"
+            and all(
+                iv.get("code_sha256", {}).get("src/econ_agent/" + name) == fingerprint
+                for name, fingerprint in proof["mapping_sha256"].items()
+            )
+            and all(iv.get("environment", {}).get(k) == v for k, v in proof["environment"].items())
+        ):
+            proof["validated_scopes"]["ivregress"] = (
+                "AJR 单工具 2SLS、常规协方差、small；无控制与纬度控制；N=64；"
+                "独立参考、重新提取及生命周期检查；证据 docs/evidence/demo_v01_iv.json"
+            )
     ajr_path = ROOT / "docs/evidence/stage7_ajr.json"
     if ajr_path.is_file():
         ajr = json.loads(ajr_path.read_text())
@@ -310,12 +327,16 @@ def write_registry(record: dict[str, Any]) -> None:
                     "当前包在新原生会话重跑；证据 docs/evidence/stage7_ajr.json"
                 )
                 proof["ajr_result_ids"] = [r["result_id"] for r in ajr["current_results"]]
+    proof["validated_scopes"] = {
+        k: v.replace("stage7_methods.json", evidence_name + ".json")
+        for k, v in proof["validated_scopes"].items()
+    }
     (ROOT / "src/econ_agent/method_validation.json").write_text(
         json.dumps(proof, ensure_ascii=False, indent=2) + "\n"
     )
 
 
-async def main() -> int:
+async def main(evidence_name: str = "stage7_methods") -> int:
     initial_mapping = mapping_hashes()
     directory = ROOT / "local_reference/stage7" / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%f")
     directory.mkdir(parents=True)
@@ -546,7 +567,7 @@ async def main() -> int:
                 store.transition_run(RunStatus.RUNNING, reason="继续下一项独立方法夹具")
             record["invalid_rdd"] = await invalid_rdd(store, backend, prepared.input_artifact_id)
             assert mapping_hashes() == initial_mapping, "真实验收期间映射代码发生变化，须重跑"
-            write_registry(record)
+            write_registry(record, evidence_name)
             record["capabilities"] = [
                 c.model_dump(mode="json") for c in await backend.capabilities()
             ]
@@ -567,7 +588,7 @@ async def main() -> int:
     (ROOT / "examples/methods/stata18_reference.json").write_text(
         json.dumps(fixtures, ensure_ascii=False, indent=2) + "\n"
     )
-    (ROOT / "docs/evidence/stage7_methods.json").write_text(
+    (ROOT / "docs/evidence" / (evidence_name + ".json")).write_text(
         json.dumps(record, ensure_ascii=False, indent=2) + "\n"
     )
     (directory / "validation.json").write_text(
@@ -579,4 +600,8 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    parser = argparse.ArgumentParser(description="显式真实 Stata 方法验收")
+    parser.add_argument(
+        "--evidence-name", choices=("stage7_methods", "demo_v01_methods"), default="stage7_methods"
+    )
+    raise SystemExit(asyncio.run(main(parser.parse_args().evidence_name)))

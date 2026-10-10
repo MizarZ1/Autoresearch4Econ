@@ -365,7 +365,7 @@ async def conduct(
                     answer,
                     request_id=request_id,
                     design_sha256=design_sha256,
-                    model=PersistentModelClient(store, config, transport)
+                    model=PersistentModelClient(store, config, transport, reserved_model_calls=1)
                     if config and transport
                     else None,
                 )
@@ -413,7 +413,9 @@ async def conduct(
                     raw,
                     request_id=request.request_id,
                     design_sha256=request.target_design_sha256,
-                    model=PersistentModelClient(store, configuration, transport)
+                    model=PersistentModelClient(
+                        store, configuration, transport, reserved_model_calls=1
+                    )
                     if configuration and transport
                     else None,
                 )

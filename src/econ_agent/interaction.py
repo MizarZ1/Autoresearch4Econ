@@ -5,6 +5,7 @@ import time
 from typing import Any, Literal
 
 from econ_agent.model_client import PersistentModelClient, redact
+from econ_agent.reporting import elapsed_seconds
 from econ_agent.schemas import HumanAnswer, HumanFeedback, RunStatus
 from econ_agent.state import RunStore, StateConflict, new_id
 
@@ -99,12 +100,18 @@ async def apply_feedback(
         ),
         ensure_ascii=False,
     )
+    remaining = store.load_state().budget.max_runtime_seconds - elapsed_seconds(store)
+    if remaining <= 0:
+        return {"status": "pending", "说明": "总运行时间预算已耗尽；原始输入和待答问题已保留"}
+    if len(store.model_calls()) >= store.load_state().budget.max_model_calls - 1:
+        return {"status": "pending", "说明": "模型余量须留给论文写作；可用显式命令处理待答问题"}
     started = time.monotonic()
     call, interpreted, error = await model.interpret_feedback(
         context=context,
         operation_id=new_id("operation"),
         context_design_id=design.design_id,
         context_result_ids=results,
+        timeout_seconds=remaining,
     )
     payload = {
         "schema_version": 1,

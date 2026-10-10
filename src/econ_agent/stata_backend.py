@@ -710,7 +710,11 @@ class StataBackend:
                 snapshot_id = payload["files"]["r_snapshot.json"]
                 scalar_snapshot = json.loads(self.store.read_artifact(snapshot_id))
                 normalized = extract_summary(
-                    {"data": {"r": scalar_snapshot}}, named_csv, spec, program.summary
+                    {"data": {"r": scalar_snapshot}},
+                    named_csv,
+                    spec,
+                    program.summary,
+                    actual_command=program.code.strip(),
                 )
             result = self.store.save_result(attempt_id, normalized)
             evidence: tuple[str, ...] = (
@@ -760,7 +764,7 @@ class StataBackend:
             validation = self.store.save_validation(
                 result.artifact_id,
                 checks,
-                rules_version="stata-iv-2" if program.iv else "stata-methods-1",
+                rules_version="stata-iv-3" if program.iv else "stata-methods-2",
             )
             return AnalysisOutcome(
                 result=self.store.result(result.artifact_id),

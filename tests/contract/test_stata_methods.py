@@ -38,6 +38,51 @@ from tests.contract.test_stata_backend import FakeTransport, attempt
 REFERENCE = Path(__file__).resolve().parents[2] / "examples/methods/stata18_reference.json"
 
 
+def test_summary_case_sensitive_variable_is_not_verified() -> None:
+    fixture = case("summary")
+    program = StataProgram.model_validate(fixture["program"])
+    assert program.summary
+    program = program.model_copy(
+        update={"code": program.code.replace("summarize x", "summarize X")}
+    )
+    assert program.summary is not None
+    spec = specification(program)
+    normalized = extract_summary(
+        {"data": {"r": fixture["scalar_snapshot"]}},
+        fixture["named_csv"],
+        spec,
+        program.summary,
+        actual_command=program.code.strip(),
+    )
+    checks = method_checks(
+        fixture["stored"], normalized, spec, program, sample_match=True, evidence_ids=("raw_test",)
+    )
+    assert next(c for c in checks if c.category == "specification").status == "fail"
+    assert normalized.actual_command.startswith("summarize X")
+
+
+@pytest.mark.parametrize("name", ["linear", "did", "rdd", "logit"])
+@pytest.mark.parametrize("field,value", [("p_value", "0.8"), ("lower", "100"), ("upper", "200")])
+def test_inconsistent_p_or_interval_is_rejected(name: str, field: str, value: str) -> None:
+    import csv
+    import io
+
+    fixture = case(name)
+    reader = csv.DictReader(io.StringIO(fixture["named_csv"]))
+    rows = list(reader)
+    rows[0][field] = value
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=reader.fieldnames or [])
+    writer.writeheader()
+    writer.writerows(rows)
+    program = StataProgram.model_validate(fixture["program"])
+    assert program.regression
+    with pytest.raises(ValueError, match="推断口径"):
+        extract_regression(
+            fixture["stored"], output.getvalue(), specification(program), program.regression
+        )
+
+
 def case(name: str) -> dict[str, Any]:
     return dict(json.loads(REFERENCE.read_text())["cases"][name])
 

@@ -151,19 +151,11 @@ class ResearchLoop:
                 self.feedback = []
                 self.errors = 0
         checkpoint_time = checkpoints[-1].created_at if checkpoints else None
-        from econ_agent.reporting import writing_seconds
+        from econ_agent.reporting import elapsed_seconds, writing_seconds
 
         current_writing_seconds = writing_seconds(store)
-        self.elapsed_before += current_writing_seconds - self.writing_seconds_accounted
+        self.elapsed_before = elapsed_seconds(store)
         self.writing_seconds_accounted = current_writing_seconds
-        for artifact in store.artifacts(kind="tool_response"):
-            if (
-                artifact.relative_path.startswith("calls/human/")
-                and artifact.relative_path.endswith("/interpretation.json")
-                and (checkpoint_time is None or artifact.created_at > checkpoint_time)
-            ):
-                interpretation = json.loads(store.read_artifact(artifact.artifact_id))
-                self.elapsed_before += float(interpretation.get("processing_seconds", 0))
         if self.errors >= self.max_errors and checkpoint_time is not None:
             # 普通 resume 仍受错误上限约束；新的显式接受才开启下一段有界尝试。
             # 不增加总预算，也不清空成功分析或同一 attempt 的重试次数。
@@ -484,6 +476,22 @@ class ResearchLoop:
             )
             if candidate != spec:
                 raise ActionRejected("修复只能改代码，改变分析规格须创建新分析")
+            if previous.arguments_artifact_id is None:
+                raise ActionRejected("旧分析缺少完整参数证据，不能确认同规格修复")
+            saved_arguments = json.loads(self.store.read_artifact(previous.arguments_artifact_id))
+            saved_program = saved_arguments.get("program", saved_arguments)
+            original = StataProgram.model_validate(
+                {
+                    k: v
+                    for k, v in saved_program.items()
+                    if k in {"code", "iv", "regression", "summary"}
+                }
+            )
+            proposed = StataProgram(
+                code=args.code, iv=args.iv, regression=args.regression, summary=args.summary
+            )
+            if original.model_dump(exclude={"code"}) != proposed.model_dump(exclude={"code"}):
+                raise ActionRejected("修复不能改变协方差、变量角色或方法结构；请创建新分析")
             if not attempt.termination_confirmed or attempt.execution_status.value not in {
                 "FAILED",
                 "CANCELLED",

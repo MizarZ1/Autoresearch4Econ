@@ -75,6 +75,58 @@ def loop_for(
     return ResearchLoop(store, model, backend, spec.input_artifact_id, **options), transport
 
 
+async def test_retry_cannot_change_covariance(setup_backend: BackendFixture) -> None:
+    store, _, stata, old_spec, _ = setup_backend
+    old = store.design(old_spec.design_id)
+    design = store.create_design(
+        old.content.model_copy(update={"methods": ("regress",)}), change_reason="测试线性规格"
+    )
+    request = store.request_human(design.design_id, "测试确认")
+    store.apply_answer(
+        request.request_id,
+        design_sha256=content_hash(design),
+        answer=HumanAnswer(decision="accept", explanation="测试确认"),
+    )
+    stata.mode = "stata_failure"
+
+    def choose(context: dict[str, Any]) -> dict[str, Any]:
+        failed = next(
+            (f.get("attempt_id") for f in context["recent_feedback"] if f.get("attempt_id")), None
+        )
+        return {
+            "action": "run_analysis",
+            "reason": "测试修复边界",
+            "arguments": {
+                "design_id": design.design_id,
+                "design_version": design.version,
+                "purpose": "合成线性分析",
+                "initiation": "planned",
+                "based_on_result_ids": [],
+                "input_artifact_id": context["input_artifact_id"],
+                "method": "regress",
+                "variables": ["y", "x"],
+                "sample_rule": "group==1",
+                "expected_result_type": "coefficients",
+                "retry_attempt_id": failed,
+                "code": "regress y x if group==1" + (", vce(robust)" if failed else ""),
+                "regression": {
+                    "family": "linear",
+                    "outcome": "y",
+                    "regressors": ["x"],
+                    "sample_expression": "group==1",
+                    "covariance": "robust" if failed else "unadjusted",
+                },
+            },
+        }
+
+    loop, transport = loop_for(setup_backend, choose)
+    await loop.run()
+    assert len(transport.contexts) == 2
+    experiments = [e for e in store.experiments() if e.design_id == design.design_id]
+    assert len(experiments) == 1 and len(store.attempts(experiments[0].experiment_id)) == 1
+    assert "协方差" in loop.feedback[-1]["error"]
+
+
 async def test_result_triggers_supplement_with_persistent_source_chain(
     setup_backend: BackendFixture,
 ) -> None:
@@ -348,7 +400,13 @@ async def test_changed_numeric_tool_result_changes_next_decision(
         ):
             session = native.sessions[arguments["session_id"]]
             output = session["output"] / "coefficients.csv"
-            output.write_text(output.read_text().replace("x,1,1,", f"x,{coefficient},1,"))
+            output.write_text(
+                output.read_text().replace(
+                    "x,1,1,0.4226497308103743,-3.302652729911275,5.302652729911275",
+                    f"x,{coefficient},1,0.4226497308103743,"
+                    f"{coefficient - 4.302652729911275},{coefficient + 4.302652729911275}",
+                )
+            )
         return raw
 
     monkeypatch.setattr(native, "call", altered)
