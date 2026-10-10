@@ -1,11 +1,19 @@
 """Stata 后端的代码、数据保护和明确错误契约。"""
 
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
-from econ_agent.schemas import Contract, ExperimentResult, Identifier, Nonempty, Sha256
+from econ_agent.schemas import (
+    Contract,
+    ExperimentResult,
+    Identifier,
+    Nonempty,
+    RegressionSpecification,
+    Sha256,
+    SummarySpecification,
+)
 from econ_agent.schemas import IVSpecification as IVSpecification
 
 
@@ -14,6 +22,14 @@ class StataProgram(Contract):
 
     code: Nonempty
     iv: IVSpecification | None = None
+    regression: RegressionSpecification | None = None
+    summary: SummarySpecification | None = None
+
+    @model_validator(mode="after")
+    def one_extraction(self) -> Self:
+        if sum(v is not None for v in (self.iv, self.regression, self.summary)) > 1:
+            raise ValueError("一次分析只能声明一种提取规则")
+        return self
 
 
 class PreparedInput(Contract):

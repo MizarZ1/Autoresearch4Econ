@@ -571,3 +571,56 @@ async def test_stale_failed_attempt_does_not_reuse_retry_number(
     calls = store.tool_calls()
     assert not store.call_summary()["unfinished_tool_calls"]
     assert len({(c.operation_id, c.retry_no) for c in calls}) == len(calls)
+
+
+async def test_explicit_recovery_preserves_success_and_budgets(
+    setup_backend: BackendFixture,
+) -> None:
+    store, _, _, _, _ = setup_backend
+
+    def fail_after_baseline(context: dict[str, Any]) -> dict[str, Any]:
+        action = analysis(context)
+        if context["selected_results"]:
+            action["arguments"]["based_on_result_ids"] = []
+        return action
+
+    loop, _ = loop_for(setup_backend, fail_after_baseline)
+    await loop.run()
+    assert loop.errors == 2
+    baseline = store.selected_results()[0]
+    assert baseline.result_id
+    assert baseline.result_id in str(loop.feedback[-1]["error"])
+    budget = store.load_state().budget
+    calls = store.call_summary()
+    store.transition_run(RunStatus.RUNNING)
+    ordinary, _ = loop_for(setup_backend, fail_after_baseline)
+    await ordinary.run()
+    assert store.call_summary() == calls
+    assert ordinary.errors == 2
+    store.transition_run(RunStatus.RUNNING)
+    request = store.request_human(baseline.design_id, "显式恢复原设计", kind="research_question")
+    store.apply_answer(
+        request.request_id,
+        design_sha256=request.target_design_sha256,
+        answer=HumanAnswer(decision="accept", explanation="接受原设计并继续；离线脚本确认"),
+    )
+
+    def continue_once(context: dict[str, Any]) -> dict[str, Any]:
+        if len(context["selected_results"]) == 1:
+            return analysis(context, purpose="纠正依据引用后补充一次")
+        action = json.loads(json.dumps(FINISH))
+        action["arguments"]["evidence_artifact_ids"] = [
+            r["result_id"] for r in context["selected_results"]
+        ]
+        return cast(dict[str, Any], action)
+
+    recovered, _ = loop_for(setup_backend, continue_once)
+    assert recovered.errors == 0
+    # 新检查点立即消费确认，构造下一实例不会再次消费同一答复。
+    latest = json.loads(store.read_artifact(store.artifacts(kind="tool_response")[-1].artifact_id))
+    assert request.request_id in latest["reason"]
+    await recovered.run()
+    assert store.load_state().budget == budget and store.load_state().research_round == 2
+    assert len(store.attempts(baseline.experiment_id)) == 1
+    assert baseline.result_id in {r.result_id for r in store.selected_results()}
+    assert len(store.selected_results()) == 2

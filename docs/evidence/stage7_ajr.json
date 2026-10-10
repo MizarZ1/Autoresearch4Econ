@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "run_id": "run_1af64417376540449cc9a9d17fa497a4",
+  "report_id": "report_2d76a19b735b4ffd944b1363c730e4cd",
+  "current_results": [
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "experiment_id": "experiment_6d61502245384750a4a987ba46aaa197",
+      "attempt_id": "attempt_0ad16db57441457c81e83ca07d93902f",
+      "design_id": "design_f003f1b7d45445fe835f798e0e673306",
+      "result_id": "result_b84b62134e6541ccafd2514cb0ce5609",
+      "execution_status": "SUCCEEDED",
+      "raw_artifact_ids": [
+        "artifact_e1d68deb61ac4c53aaa7ed99c33420e9"
+      ],
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 63,
+        "sample_note": "Stata 实际估计样本；已与声明条件逐行比较",
+        "actual_command": "ivregress 2sls logpgp95 (avexpr = logem4) if baseco==1 & lat_abst>0, small",
+        "estimator": "2SLS，有限样本 t 推断",
+        "variables": [
+          "logpgp95",
+          "avexpr",
+          "logem4"
+        ],
+        "sample_rule": "baseco==1 & lat_abst>0",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "实际 e(vce)=unadjusted，small 修正，95% 区间及双侧 p 值由 Stata 计算"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "avexpr",
+            "meaning": "avexpr 的 2SLS 系数",
+            "value": 0.9681260376258296,
+            "standard_error": 0.16379672065764586,
+            "confidence_interval": [
+              0.6405942518539733,
+              1.2956578233976859
+            ],
+            "p_value": 1.6514874638869616e-07,
+            "degrees_of_freedom": 61.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.7269224171969988,
+            "standard_error": 1.0817805141449817,
+            "confidence_interval": [
+              -0.43623141267525734,
+              3.890076247069255
+            ],
+            "p_value": 0.11557427033819255,
+            "degrees_of_freedom": 61.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "extraction_status": "SUCCEEDED",
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "c41a99567a49de6eca56adb432e495b782bbaf2ded942e5ae6f3f66c7393009e"
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "experiment_id": "experiment_dc01a19048864ebdaf42ea7df2d95cf9",
+      "attempt_id": "attempt_8988ea2732f8406ea24d9f646e0777d5",
+      "design_id": "design_f003f1b7d45445fe835f798e0e673306",
+      "result_id": "result_4d97e9009ad34092b604dffbddd0b794",
+      "execution_status": "SUCCEEDED",
+      "raw_artifact_ids": [
+        "artifact_6a0ff2f8c0564b62b85676be1c2bd159"
+      ],
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 63,
+        "sample_note": "Stata 实际估计样本；已与声明条件逐行比较",
+        "actual_command": "ivregress 2sls logpgp95 (avexpr = logem4) lat_abst if baseco==1 & lat_abst>0, small",
+        "estimator": "2SLS，有限样本 t 推断",
+        "variables": [
+          "logpgp95",
+          "avexpr",
+          "logem4",
+          "lat_abst"
+        ],
+        "sample_rule": "baseco==1 & lat_abst>0",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "实际 e(vce)=unadjusted，small 修正，95% 区间及双侧 p 值由 Stata 计算"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "avexpr",
+            "meaning": "avexpr 的 2SLS 系数",
+            "value": 0.997403173143447,
+            "standard_error": 0.21887683675603548,
+            "confidence_interval": [
+              0.5595843132909781,
+              1.4352220329959158
+            ],
+            "p_value": 2.6026334966300053e-05,
+            "degrees_of_freedom": 60.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "lat_abst",
+            "meaning": "lat_abst 的 2SLS 系数",
+            "value": -0.364594004723207,
+            "standard_error": 1.2699210120775812,
+            "confidence_interval": [
+              -2.904814239312139,
+              2.175626229865725
+            ],
+            "p_value": 0.7750251325378803,
+            "degrees_of_freedom": 60.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.6018392378118484,
+            "standard_error": 1.3003819477922967,
+            "confidence_interval": [
+              -0.9993119401437456,
+              4.2029904157674425
+            ],
+            "p_value": 0.22282148845088012,
+            "degrees_of_freedom": 60.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "extraction_status": "SUCCEEDED",
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "2998a1f7228ed42e9945ad19e5cff14cc649f56a7ba89920a3f9a54e7ce13fae"
+    }
+  ],
+  "scripted_confirmations": true,
+  "human_authorization_source": "用户原始答复：你自行选择最优",
+  "sample_rule_reason": "最小工程变更；不宣称统计最优",
+  "calls": {
+    "schema_version": 1,
+    "model_calls": 27,
+    "tool_calls": 19,
+    "model_transport_failures": 0,
+    "model_parse_failures": 1,
+    "tool_failures": 5,
+    "model_retries": 0,
+    "tool_retries": 0,
+    "unfinished_model_calls": 0,
+    "unfinished_tool_calls": 0,
+    "known_total_tokens": 337326,
+    "missing_total_usage_calls": 0
+  },
+  "requested_models": [
+    "deepseek-chat"
+  ],
+  "returned_models": [
+    "deepseek-flash"
+  ],
+  "environment": "本机既有 Stata 18.0.185；mcp-stata 3.3.0；未下载更新包",
+  "export_hashes_passed": true,
+  "evidence_claims": 2,
+  "original_data_unchanged": true,
+  "review_batches": [
+    {
+      "parent_tool_call_id": "tool_4ad2ed679c134c08815ed4272b0f64d5",
+      "model_call_ids": [
+        "model_5a109b5559664b47a560926d9da506b5",
+        "model_38db363d92bb45f0b67defe8488a490f"
+      ],
+      "context_result_ids": [
+        "result_b84b62134e6541ccafd2514cb0ce5609",
+        "result_4d97e9009ad34092b604dffbddd0b794"
+      ],
+      "overlap_seconds": 6.242368,
+      "both_valid": true
+    },
+    {
+      "parent_tool_call_id": "tool_7c23b0e2d2474c0a8fd085b918ed91bc",
+      "model_call_ids": [
+        "model_d0298a5d10464335babef44084959cbe",
+        "model_e38792a7e3a74996ae6e6a4342e48e63"
+      ],
+      "context_result_ids": [
+        "result_b84b62134e6541ccafd2514cb0ce5609",
+        "result_4d97e9009ad34092b604dffbddd0b794"
+      ],
+      "overlap_seconds": 5.803695,
+      "both_valid": true
+    }
+  ],
+  "baseline_reference": {
+    "result_id": "result_f9c1350d0f674a78b572f91ea96dd0dd",
+    "sample_size": 64,
+    "matched": true,
+    "reference_sha256": "1a6a755eba90bc05bfc962343787033ca9795ef4ef027d6703510ce6c48b50ae"
+  },
+  "explicit_recovery_request_ids": [
+    "human_d1a8de8dfbc243f783783c18e432123e",
+    "human_3f8afb8bbbe54f34b7a77f712a003fb2"
+  ],
+  "iv_equivalent_command_reextraction": {
+    "artifact_id": "artifact_7ec91a5924b54ce3aa8768bd314d5177",
+    "source": "开发者明确修正等价控制变量位置的核验规则；不改设计，不重跑估计",
+    "old_result_id": "result_99c07729329a4aceb20fbeacc391d324",
+    "new_result_id": "result_4d97e9009ad34092b604dffbddd0b794",
+    "attempt_id": "attempt_8988ea2732f8406ea24d9f646e0777d5",
+    "validation_artifact_id": "validation_ce216dbc27b240ccbedeb63def654b37",
+    "rules_version": "stata-iv-2",
+    "no_new_model_or_mcp_calls": true
+  },
+  "export_no_model_or_stata": true,
+  "core_environment_export": {
+    "passed": true,
+    "mcp_installed": false,
+    "psutil_installed": false,
+    "child_code_sha256": "2d4a853856d705c19e56dfddb1240b3b229761e3158f7f1ad53fbf21716893e0"
+  },
+  "native_rerun": {
+    "new_native_session": true,
+    "relocated_package": true,
+    "absolute_tolerance": 1e-07,
+    "relative_tolerance": 1e-06,
+    "results": [
+      {
+        "result_id": "result_4d97e9009ad34092b604dffbddd0b794",
+        "attempt_id": "attempt_8988ea2732f8406ea24d9f646e0777d5",
+        "sample_size": 63,
+        "matched": true
+      },
+      {
+        "result_id": "result_b84b62134e6541ccafd2514cb0ce5609",
+        "attempt_id": "attempt_0ad16db57441457c81e83ca07d93902f",
+        "sample_size": 63,
+        "matched": true
+      }
+    ],
+    "child_code_sha256": "52254619f35f997f74924aa5cfb046039fd7bf11471dac7895509e41d21d6605",
+    "model_received_reference": false
+  },
+  "code_sha256": {
+    "scripts/validate_stage6.py": "be60e033d7802ca5f8b7cba1f0764a044c9b975cc388fa9d640d4bd6850c4b2a",
+    "src/econ_agent/__init__.py": "bfd617b41076ff66a4479b7838c2be05a5a02572d861815a1c0484f1c395d533",
+    "src/econ_agent/cli.py": "34dd152f4987a1276b5e804f44d837e37d6618cca4c0b70538df183ea17ff760",
+    "src/econ_agent/config.py": "ca5a7b1d604a52c218a39ca7f210f5e0efcee941f2423dbed390ca1b7a7e91b3",
+    "src/econ_agent/diagnostics.py": "89dc0931c72f824bdcd9b9260fa7edf9cea1e6e4d5f465a1ef537e14d5c84adb",
+    "src/econ_agent/exporting.py": "c26103e1ea4d309bc7fe14f960808628bd3ce2268f658da4d3e9c333075ea689",
+    "src/econ_agent/harness.py": "62c9aedf1f0b53141f5d47721f42496b56b0dab96bdd01b1309f94f378316199",
+    "src/econ_agent/inputs.py": "6167a743025074596920387d2b653347ef5f227419838569eeac47831bb9c338",
+    "src/econ_agent/interaction.py": "1413cfd286f8b3ddd4a98db83c8a5fa736dd71fe45f55fa5a1c493aabec83295",
+    "src/econ_agent/migrations.py": "c8eadeaec02044e20f17b2cda431f68f81bf303e009a2e703bc746632da936c5",
+    "src/econ_agent/model_client.py": "faac344d8c5148322f5a1ba21a465379addb818a330d8ca6412fdc83223e449f",
+    "src/econ_agent/paper_contracts.py": "1e720117d2983dd70bb8a19ac672ce186985e6812e57e75940655e45969f2ad0",
+    "src/econ_agent/ports.py": "65dbd15255f57df2345eb587365d1b27307f935d0fe552695d6ad91ce11f15d9",
+    "src/econ_agent/processes.py": "fb157e4e02856069faae498c55402ceb7c9bd5d018ce2d3571b505873a259de6",
+    "src/econ_agent/recovery.py": "bdb3d5dda470f179065d32a4aca2d5a35232e38c8093dbff82e5bc9ca3f4ffe3",
+    "src/econ_agent/reporting.py": "3097e165abb930f6a289f829d63f415e224959c92ede80f59720ab32b506c424",
+    "src/econ_agent/review.py": "0e5e3e40542619197764ee983bb0258c546add3c7851700c680aac467c4ce399",
+    "src/econ_agent/schemas.py": "b18fd97a5fa5a7680ceae6c7ff34878e6afe0270a825500ec6de811f5ac02dd4",
+    "src/econ_agent/session.py": "3704222f4e14caefdb697847fa3d2cc9a57f60a4ddf526909e8e952a89de9c82",
+    "src/econ_agent/stata_backend.py": "217782e8846a5ec56f762507082be05ee2475d889b541e40d5b94e49807b7879",
+    "src/econ_agent/stata_contracts.py": "2b3a010f814df141422bb9761388389e13b5e1088f3cc658414ac009e5b6a2f6",
+    "src/econ_agent/stata_mcp.py": "b4dd9d9f19ccc2a9dd544061f1c25f5eb293a9058ab22b69d1f204d270c95485",
+    "src/econ_agent/stata_methods.py": "ae65f7834a886876bf5eed75e2595a4a3d77772465c88e9aafcc076e3cf15d41",
+    "src/econ_agent/stata_results.py": "bf27f9d681ec0aeccf0d0067bdf07ef0ab75f80eae33caa45d0e449355491b99",
+    "src/econ_agent/stata_transport.py": "a78e5a47015b3cf3f97c6ac611f563f3611112e9c4e8c71de5b3986486779876",
+    "src/econ_agent/state.py": "e3b3d6832db55be5a0fd7788e09581c92ce267956ce6c63af94cad69accab65f"
+  },
+  "code_sha256_scope": "最终导出与复现核对时的工作树；不倒填此前模型调用的代码版本"
+}

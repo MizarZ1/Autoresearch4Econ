@@ -24,11 +24,30 @@ def iv_extraction_code(iv: IVSpecification) -> str:
     """在同一锁及会话中读取真实列名、样本及 t 推断，再导出具名 CSV。"""
     if re.search(r"[^A-Za-z0-9_ .()=!<>|&+*/-]", iv.sample_expression):
         raise ValueError("已核验 IV 规则只接受单行数值型样本表达式")
-    variables = ",".join(iv.variables())
+    return coefficient_extraction_code(iv.sample_expression, iv.variables())
+
+
+def coefficient_extraction_code(
+    sample_expression: str,
+    variable_names: tuple[str, ...],
+    *,
+    normal: bool = False,
+    structure_code: str = "",
+) -> str:
+    """共同具名提取：线性模型使用 t，Logit 使用正态推断。"""
+    if re.search(r"[^A-Za-z0-9_ .()=!<>|&+*/-]", sample_expression):
+        raise ValueError("提取规则只接受单行数值型样本表达式")
+    variables = ",".join(variable_names)
+    p_expression = (
+        "2*normal(-abs(_b[`econ_name']/econ_se))"
+        if normal
+        else "2*ttail(e(df_r),abs(_b[`econ_name']/econ_se))"
+    )
     return f"""* 主估计的 e() 已先由 MCP 保存；这里读取具名参数及样本证据。
 local econ_names : colnames e(b)
-capture assert e(sample) == (({iv.sample_expression}) & !missing({variables}))
+capture assert e(sample) == (({sample_expression}) & !missing({variables}))
 local econ_sample_ok = (_rc == 0)
+{structure_code}
 tempname econ_sample_file
 file open `econ_sample_file' using "$ECON_OUTPUT/sample_check.txt", write text
 file write `econ_sample_file' "`econ_sample_ok'"
@@ -40,11 +59,11 @@ postfile `econ_post' str64 parameter ///
     using "$ECON_OUTPUT/coefficients.dta"
 foreach econ_name of local econ_names {{
     scalar econ_se = _se[`econ_name']
-    scalar econ_p = 2*ttail(e(df_r),abs(_b[`econ_name']/econ_se))
-    scalar econ_critical = invttail(e(df_r),0.025)
+    scalar econ_p = {p_expression}
+    scalar econ_critical = {"invnormal(0.975)" if normal else "invttail(e(df_r),0.025)"}
     post `econ_post' ("`econ_name'") (_b[`econ_name']) (econ_se) (econ_p) ///
         (_b[`econ_name']-econ_critical*econ_se) ///
-        (_b[`econ_name']+econ_critical*econ_se) (e(df_r)) (e(N))
+        (_b[`econ_name']+econ_critical*econ_se) ({"." if normal else "e(df_r)"}) (e(N))
 }}
 postclose `econ_post'
 preserve
@@ -143,6 +162,11 @@ def iv_checks(
     expected_names = {iv.endogenous, *iv.controls, "_cons"}
     body = "\n".join(line for line in program.code.splitlines() if not line.strip().startswith("*"))
     body = re.sub(r"^\s*(quietly|qui)\s+", "", body)
+    controls_after = (
+        f"ivregress 2sls {iv.outcome} ({iv.endogenous}={' '.join(iv.instruments)}) "
+        f"{' '.join(iv.controls)} if {iv.sample_expression}, small"
+    )
+    allowed_commands = {canonical_command(iv.command()), canonical_command(controls_after)}
     matches = (
         e.get("depvar") == iv.outcome
         and set(str(e.get("endog", "")).split()) == {iv.endogenous}
@@ -151,8 +175,8 @@ def iv_checks(
         and set(spec.variables) == set(iv.variables())
         and canonical_command(spec.sample_rule) == canonical_command(iv.sample_expression)
         and spec.method == "ivregress 2sls"
-        and canonical_command(e["cmdline"]) == canonical_command(iv.command())
-        and canonical_command(body) == canonical_command(iv.command())
+        and canonical_command(e["cmdline"]) in allowed_commands
+        and canonical_command(body) == canonical_command(e["cmdline"])
         and sample_match
     )
     return (

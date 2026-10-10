@@ -1,0 +1,934 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "seed": 2001,
+  "input_sha256": "80cc9b68b9dc6153eb3b06f6b66abd3fbae7bc66f6cd1d418c7934aa7683a556",
+  "cases": {
+    "linear": {
+      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
+      "design_id": "design_3df4cb363507402ea83c956f8114366d",
+      "experiment_id": "experiment_ae7f0aa7643e4f808a835415e03605ca",
+      "attempt_id": "attempt_97b7b1a1f7e340e88929db2546a9743c",
+      "result_id": "result_e1d138fc23a4405e9db2b27870828235",
+      "validation_artifact_id": "validation_f59f7014416a480ea87045a6eac29437",
+      "command": "regress ylinear x if included==1",
+      "environment": {
+        "mcp_version": "3.3.0",
+        "stata_build": "18.0.185",
+        "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+      },
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 399,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress ylinear x if included==1",
+        "estimator": "OLS",
+        "variables": [
+          "ylinear",
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "x",
+            "meaning": "x 的 linear 系数",
+            "value": 1.9967755859763634,
+            "standard_error": 0.010342008080399725,
+            "confidence_interval": [
+              1.9764436383706085,
+              2.0171075335821183
+            ],
+            "p_value": 0.0,
+            "degrees_of_freedom": 397.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.5131962812239923,
+            "standard_error": 0.01460746851098799,
+            "confidence_interval": [
+              1.484478620001024,
+              1.5419139424469606
+            ],
+            "p_value": 1.8036710676039929e-289,
+            "degrees_of_freedom": 397.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "native_reference_matched": true,
+      "relocated_bundle_matched": true,
+      "non_coefficient_facts": null
+    },
+    "did": {
+      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
+      "design_id": "design_fbd59cd1eaf94ec499db145f6ffc81b3",
+      "experiment_id": "experiment_5690f74600dc495a9180f5b2fad85d9a",
+      "attempt_id": "attempt_98c8e63c78c64c94be05ef61e0c4fc96",
+      "result_id": "result_d266df0f63d94dc4b34fef025f9efdf3",
+      "validation_artifact_id": "validation_3e8c736716df4137b72d5750e0887c2b",
+      "command": "regress ydid group post did if included==1, vce(robust)",
+      "environment": {
+        "mcp_version": "3.3.0",
+        "stata_build": "18.0.185",
+        "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+      },
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress ydid group post did if included==1, vce(robust)",
+        "estimator": "两组两期重复截面 DiD",
+        "variables": [
+          "ydid",
+          "group",
+          "post",
+          "did"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "HC1 稳健标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "group",
+            "meaning": "group 的 did 系数",
+            "value": 0.6737206363677899,
+            "standard_error": 0.041917049715737696,
+            "confidence_interval": [
+              0.5913128647987932,
+              0.7561284079367866
+            ],
+            "p_value": 4.1550500683070575e-45,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "post",
+            "meaning": "post 的 did 系数",
+            "value": 0.17657416820525337,
+            "standard_error": 0.042651756559310874,
+            "confidence_interval": [
+              0.09272198310653668,
+              0.26042635330397007
+            ],
+            "p_value": 4.248097887946626e-05,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "did",
+            "meaning": "did 的 did 系数",
+            "value": 1.801533830165879,
+            "standard_error": 0.058767496814119066,
+            "confidence_interval": [
+              1.6859985411609992,
+              1.9170691191707587
+            ],
+            "p_value": 1.345978835471672e-106,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 3.0559243607521096,
+            "standard_error": 0.029491572392165794,
+            "confidence_interval": [
+              2.9979447372484147,
+              3.1139039842558045
+            ],
+            "p_value": 5.294823883735479e-289,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "native_reference_matched": true,
+      "relocated_bundle_matched": true,
+      "non_coefficient_facts": null
+    },
+    "rdd": {
+      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
+      "design_id": "design_68f8fa2214f84383b893cc4d0eb0a621",
+      "experiment_id": "experiment_0ec80ed5eac546b2a7ffac02f61a2e60",
+      "attempt_id": "attempt_f6071aa1631840e6b9d14658018d6aeb",
+      "result_id": "result_29a670caf3354c4c958f7775d5437e4a",
+      "validation_artifact_id": "validation_bfe33c7cfa10491eb4295a5d6bb909aa",
+      "command": "regress yrdd treated centered interaction if abs(running-0)<=0.5, vce(robust)",
+      "environment": {
+        "mcp_version": "3.3.0",
+        "stata_build": "18.0.185",
+        "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+      },
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 200,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress yrdd treated centered interaction if abs(running-0)<=0.5, vce(robust)",
+        "estimator": "锐断点局部线性 RDD，均匀权重，预先指定带宽",
+        "variables": [
+          "yrdd",
+          "treated",
+          "centered",
+          "interaction",
+          "running"
+        ],
+        "sample_rule": "abs(running-0)<=0.5",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "HC1 稳健标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "treated",
+            "meaning": "treated 的 rdd 系数",
+            "value": 3.014877408999674,
+            "standard_error": 0.06706223811649971,
+            "confidence_interval": [
+              2.8826212047932094,
+              3.1471336132061385
+            ],
+            "p_value": 3.3860278561820492e-105,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "centered",
+            "meaning": "centered 的 rdd 系数",
+            "value": 0.4698436425272781,
+            "standard_error": 0.17136799091664012,
+            "confidence_interval": [
+              0.13188176356716586,
+              0.8078055214873904
+            ],
+            "p_value": 0.006677437860288434,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "interaction",
+            "meaning": "interaction 的 rdd 系数",
+            "value": -0.7410455853444472,
+            "standard_error": 0.2230459149060254,
+            "confidence_interval": [
+              -1.180923628453944,
+              -0.30116754223495057
+            ],
+            "p_value": 0.0010647652166970896,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.9716816836178441,
+            "standard_error": 0.05312299167615001,
+            "confidence_interval": [
+              1.8669156419152992,
+              2.076447725320389
+            ],
+            "p_value": 1.3506191635232834e-90,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "native_reference_matched": true,
+      "relocated_bundle_matched": true,
+      "non_coefficient_facts": null
+    },
+    "logit": {
+      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
+      "design_id": "design_0ccc22ca622143a195b59e34a1cd9cd1",
+      "experiment_id": "experiment_ef37580caef04d99b04fac51682f57ef",
+      "attempt_id": "attempt_813b5fd422014bf58110b44be60db7d4",
+      "result_id": "result_06826ab812204065bbae93446f062d53",
+      "validation_artifact_id": "validation_ca97196f983e4308b04a24a4f654148c",
+      "command": "logit binary x if included==1",
+      "environment": {
+        "mcp_version": "3.3.0",
+        "stata_build": "18.0.185",
+        "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+      },
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "logit binary x if included==1",
+        "estimator": "二元 Logit 对数优势系数",
+        "variables": [
+          "binary",
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "观测信息矩阵",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；正态推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "x",
+            "meaning": "x 的 logit 系数",
+            "value": 1.0986122886643883,
+            "standard_error": 0.10684346079242889,
+            "confidence_interval": [
+              0.8892029535276104,
+              1.3080216238011662
+            ],
+            "p_value": 8.455261009659715e-25,
+            "degrees_of_freedom": null,
+            "missing_reasons": {
+              "degrees_of_freedom": "Logit 使用渐近正态推断，无 t 自由度"
+            }
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": -3.010772797054968e-16,
+            "standard_error": 0.12461119656966987,
+            "confidence_interval": [
+              -0.24423345734699434,
+              0.24423345734699373
+            ],
+            "p_value": 0.9999999999999981,
+            "degrees_of_freedom": null,
+            "missing_reasons": {
+              "degrees_of_freedom": "Logit 使用渐近正态推断，无 t 自由度"
+            }
+          }
+        ]
+      },
+      "native_reference_matched": true,
+      "relocated_bundle_matched": true,
+      "non_coefficient_facts": null
+    },
+    "summary": {
+      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
+      "design_id": "design_3f2b28249f7f42f2853c5e5e23a83c86",
+      "experiment_id": "experiment_912ae2a918884863a06f2f9f4e0880ae",
+      "attempt_id": "attempt_eb8604f73d974f9fbabf4655dac998c8",
+      "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+      "validation_artifact_id": "validation_cb1451e07ffd44069cb508a5dc35e5ca",
+      "command": "summarize x if included==1",
+      "environment": {
+        "mcp_version": "3.3.0",
+        "stata_build": "18.0.185",
+        "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+      },
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "声明条件下单变量非缺失观测",
+        "actual_command": "summarize x if included==1",
+        "estimator": "未加权描述统计",
+        "variables": [
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "不适用",
+          "clusters": [],
+          "explanation": "样本标准差不是均值标准误；当前结果不提供推断"
+        },
+        "kind": "scalars",
+        "values": [
+          {
+            "schema_version": 1,
+            "name": "N",
+            "value": 400.0,
+            "meaning": "非缺失样本量",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "mean",
+            "value": 0.0,
+            "meaning": "均值",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "sd",
+            "value": 1.4159846508095772,
+            "meaning": "样本标准差",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "min",
+            "value": -2.0,
+            "meaning": "最小值",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "max",
+            "value": 2.0,
+            "meaning": "最大值",
+            "missing_reason": null
+          }
+        ]
+      },
+      "native_reference_matched": true,
+      "relocated_bundle_matched": true,
+      "non_coefficient_facts": {
+        "F0001": {
+          "table": 1,
+          "row": 1,
+          "table_row": 1,
+          "csv_line": 2,
+          "name": "样本量",
+          "value": 400,
+          "display": "400",
+          "fact_id": "F0001",
+          "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+          "result_sha256": "9bc64755dff71a7592016e5800cb6548e6b81193d6bd57cd3013874aa233bb69",
+          "field": "normalized.sample_size"
+        },
+        "F0002": {
+          "table": 1,
+          "row": 2,
+          "table_row": 2,
+          "csv_line": 3,
+          "name": "N",
+          "value": 400.0,
+          "display": "400",
+          "fact_id": "F0002",
+          "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+          "result_sha256": "9bc64755dff71a7592016e5800cb6548e6b81193d6bd57cd3013874aa233bb69",
+          "field": "normalized.values.0.value"
+        },
+        "F0003": {
+          "table": 1,
+          "row": 3,
+          "table_row": 3,
+          "csv_line": 4,
+          "name": "mean",
+          "value": 0.0,
+          "display": "0",
+          "fact_id": "F0003",
+          "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+          "result_sha256": "9bc64755dff71a7592016e5800cb6548e6b81193d6bd57cd3013874aa233bb69",
+          "field": "normalized.values.1.value"
+        },
+        "F0004": {
+          "table": 1,
+          "row": 4,
+          "table_row": 4,
+          "csv_line": 5,
+          "name": "sd",
+          "value": 1.4159846508095772,
+          "display": "1.415984651",
+          "fact_id": "F0004",
+          "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+          "result_sha256": "9bc64755dff71a7592016e5800cb6548e6b81193d6bd57cd3013874aa233bb69",
+          "field": "normalized.values.2.value"
+        },
+        "F0005": {
+          "table": 1,
+          "row": 5,
+          "table_row": 5,
+          "csv_line": 6,
+          "name": "min",
+          "value": -2.0,
+          "display": "-2",
+          "fact_id": "F0005",
+          "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+          "result_sha256": "9bc64755dff71a7592016e5800cb6548e6b81193d6bd57cd3013874aa233bb69",
+          "field": "normalized.values.3.value"
+        },
+        "F0006": {
+          "table": 1,
+          "row": 6,
+          "table_row": 6,
+          "csv_line": 7,
+          "name": "max",
+          "value": 2.0,
+          "display": "2",
+          "fact_id": "F0006",
+          "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
+          "result_sha256": "9bc64755dff71a7592016e5800cb6548e6b81193d6bd57cd3013874aa233bb69",
+          "field": "normalized.values.4.value"
+        }
+      }
+    }
+  },
+  "native_reference_code_sha256": "517c9ceb10b553315ee59a15c3477e8547307a429aa32ef9cc9ca759ef9c72ca",
+  "absolute_tolerance": 1e-07,
+  "relative_tolerance": 1e-06,
+  "additional_independent_checks": {
+    "summary_standard_library_matched": true,
+    "logit_closed_form_slope": 1.0986122886681098,
+    "logit_information_se": 0.10684346079267207,
+    "did_four_cell_difference": 1.8015338312635816
+  },
+  "command_sources": {
+    "regress.ado": {
+      "sha256": "a2bbb25f8966143c9062f76e83c6ebf404739824d9d3672a90d14a2afb776e42",
+      "version_header": "*! version 1.4.9  24nov2025",
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    },
+    "regress.sthlp": {
+      "sha256": "c54ea8b4b8cfbbdc8db817d0d8d6358ef5d98b1174e39b48b6ad7f53e9fbfb8f",
+      "version_header": null,
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    },
+    "logit.ado": {
+      "sha256": "d8a3fde925fdca55c1c5530b613eb3c050860b740fdbd6e24986ebd240b55824",
+      "version_header": "*! version 11.3.1  25jun2020",
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    },
+    "logit.sthlp": {
+      "sha256": "e0fa3479f28152514ec04d02f43692d9ff414c6e55d20d37dadbd34bc5812053",
+      "version_header": null,
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    },
+    "summarize.sthlp": {
+      "sha256": "efd516f3150e3504a9363bb8f58d6bf0662bb7b55e19aac43420fa37614a1689",
+      "version_header": null,
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    },
+    "ivregress.ado": {
+      "sha256": "30cf4622b15bc301a3490dc83e27053c99968feb2a631c27321057b4a45797c2",
+      "version_header": "*! version 1.5.9  21apr2025",
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    },
+    "ivregress.sthlp": {
+      "sha256": "4ecf486dc0c17dd363c2d3c8f7adb903d60ebd026945d0f6530aab0df236ae4f",
+      "version_header": null,
+      "source": "本机既有 Stata 随附文件；未下载更新"
+    }
+  },
+  "invalid_rdd": {
+    "actual_cutoff": 0,
+    "declared_cutoff": 0.25,
+    "result_id": "result_3816b924260f4c98946e902bd54a6852",
+    "attempt_id": "attempt_51c0669018384047bfbfd8e1155aa77e",
+    "validation_artifact_id": "validation_9a0d4fdc348944c0a09e4cbcfff92ffb",
+    "execution_succeeded": true,
+    "specification_failed": true,
+    "selection_rejected": true
+  },
+  "capabilities": [
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "regress",
+      "commands": [
+        "regress"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "含截距、满秩、无权重 OLS；常规或 HC1；两组两期重复截面 DiD；锐断点局部线性 RDD（均匀权重、预定带宽、HC1）",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "OLS 常规 t、两组两期重复截面 DiD HC1 t；锐断点 RDD h=0.5/c=0/均匀权重/HC1 t；证据 docs/evidence/stage7_methods.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "summarize",
+      "commands": [
+        "summarize"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "单变量、无权重的 N、均值、样本标准差、最小与最大值",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "合成单变量未加权 N/mean/sd/min/max；即时 r() 快照与独立参考；证据 docs/evidence/stage7_methods.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "xtreg",
+      "commands": [
+        "xtreg"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "reghdfe",
+      "commands": [
+        "reghdfe"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "ivregress",
+      "commands": [
+        "ivregress"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "supported",
+      "normalization_scope": "仅 2SLS、small、常规协方差及完整具名参数",
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "xtabond",
+      "commands": [
+        "xtabond"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "gmm",
+      "commands": [
+        "gmm"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "didregress",
+      "commands": [
+        "didregress"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "csdid",
+      "commands": [
+        "csdid"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "rdrobust",
+      "commands": [
+        "rdrobust"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "teffects",
+      "commands": [
+        "teffects"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "synth",
+      "commands": [
+        "synth"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "logit",
+      "commands": [
+        "logit"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "二元 Logit、满秩且收敛、观测信息矩阵、正态推断；系数不是边际效应",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "合成二元 Logit、观测信息矩阵与正态推断、满秩且收敛；证据 docs/evidence/stage7_methods.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "probit",
+      "commands": [
+        "probit"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "poisson",
+      "commands": [
+        "poisson"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "qreg",
+      "commands": [
+        "qreg"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "arima",
+      "commands": [
+        "arima"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "var",
+      "commands": [
+        "var"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "vec",
+      "commands": [
+        "vec"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "stcox",
+      "commands": [
+        "stcox"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    }
+  ],
+  "calls": {
+    "schema_version": 1,
+    "model_calls": 0,
+    "tool_calls": 7,
+    "model_transport_failures": 0,
+    "model_parse_failures": 0,
+    "tool_failures": 0,
+    "model_retries": 0,
+    "tool_retries": 0,
+    "unfinished_model_calls": 0,
+    "unfinished_tool_calls": 0,
+    "known_total_tokens": null,
+    "missing_total_usage_calls": 0
+  },
+  "code_sha256": {
+    "scripts/validate_stage7.py": "8e2bd79f2354a7cabc07570b2e33ac427f9ab94d6d0b767de9830b8f5c3d103c",
+    "examples/methods/reference.do": "517c9ceb10b553315ee59a15c3477e8547307a429aa32ef9cc9ca759ef9c72ca",
+    "src/econ_agent/__init__.py": "bfd617b41076ff66a4479b7838c2be05a5a02572d861815a1c0484f1c395d533",
+    "src/econ_agent/cli.py": "1589eea03d82c5d2f13de1b138391815382b5f4c8a8f58ad43a854a6e33e4eef",
+    "src/econ_agent/config.py": "ca5a7b1d604a52c218a39ca7f210f5e0efcee941f2423dbed390ca1b7a7e91b3",
+    "src/econ_agent/exporting.py": "c26103e1ea4d309bc7fe14f960808628bd3ce2268f658da4d3e9c333075ea689",
+    "src/econ_agent/harness.py": "62c9aedf1f0b53141f5d47721f42496b56b0dab96bdd01b1309f94f378316199",
+    "src/econ_agent/inputs.py": "6167a743025074596920387d2b653347ef5f227419838569eeac47831bb9c338",
+    "src/econ_agent/interaction.py": "1413cfd286f8b3ddd4a98db83c8a5fa736dd71fe45f55fa5a1c493aabec83295",
+    "src/econ_agent/migrations.py": "c8eadeaec02044e20f17b2cda431f68f81bf303e009a2e703bc746632da936c5",
+    "src/econ_agent/model_client.py": "faac344d8c5148322f5a1ba21a465379addb818a330d8ca6412fdc83223e449f",
+    "src/econ_agent/paper_contracts.py": "1e720117d2983dd70bb8a19ac672ce186985e6812e57e75940655e45969f2ad0",
+    "src/econ_agent/ports.py": "65dbd15255f57df2345eb587365d1b27307f935d0fe552695d6ad91ce11f15d9",
+    "src/econ_agent/processes.py": "fb157e4e02856069faae498c55402ceb7c9bd5d018ce2d3571b505873a259de6",
+    "src/econ_agent/recovery.py": "bdb3d5dda470f179065d32a4aca2d5a35232e38c8093dbff82e5bc9ca3f4ffe3",
+    "src/econ_agent/reporting.py": "3097e165abb930f6a289f829d63f415e224959c92ede80f59720ab32b506c424",
+    "src/econ_agent/review.py": "0e5e3e40542619197764ee983bb0258c546add3c7851700c680aac467c4ce399",
+    "src/econ_agent/schemas.py": "b18fd97a5fa5a7680ceae6c7ff34878e6afe0270a825500ec6de811f5ac02dd4",
+    "src/econ_agent/session.py": "3704222f4e14caefdb697847fa3d2cc9a57f60a4ddf526909e8e952a89de9c82",
+    "src/econ_agent/stata_backend.py": "217782e8846a5ec56f762507082be05ee2475d889b541e40d5b94e49807b7879",
+    "src/econ_agent/stata_contracts.py": "2b3a010f814df141422bb9761388389e13b5e1088f3cc658414ac009e5b6a2f6",
+    "src/econ_agent/stata_mcp.py": "b4dd9d9f19ccc2a9dd544061f1c25f5eb293a9058ab22b69d1f204d270c95485",
+    "src/econ_agent/stata_methods.py": "ae65f7834a886876bf5eed75e2595a4a3d77772465c88e9aafcc076e3cf15d41",
+    "src/econ_agent/stata_results.py": "bf27f9d681ec0aeccf0d0067bdf07ef0ab75f80eae33caa45d0e449355491b99",
+    "src/econ_agent/stata_transport.py": "a78e5a47015b3cf3f97c6ac611f563f3611112e9c4e8c71de5b3986486779876",
+    "src/econ_agent/state.py": "e3b3d6832db55be5a0fd7788e09581c92ce267956ce6c63af94cad69accab65f"
+  },
+  "finished_at": "2026-10-10T12:21:37.016771+00:00"
+}
