@@ -101,8 +101,9 @@ tmp/stage3-clean-env/bin/python scripts/check.py
 
 ## 交付与下一阶段
 
-分支为 `feat/stage3-loop`，从已合并的阶段 2 基线 main 开始。作者完成本地差异
-自检，独立审阅待完成。远端 lab404Runner 按研究者授权跳过，不计为 CI 通过，
+分支为 `feat/stage3-loop`，从已合并的阶段 2 基线 main 开始，交付为
+[草稿 PR #4](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/4)。
+作者完成本地差异自检，独立审阅待完成。远端 lab404Runner 按研究者授权跳过，不计为 CI 通过，
 不自动合并。审阅链接见 [PR 信息](PR_DRAFT.md)。
 
 阶段 3 完成信号满足：保存的请求与 trace 能指明基准结果触发了哪项补充分析，
