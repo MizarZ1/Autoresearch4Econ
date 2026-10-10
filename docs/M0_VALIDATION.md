@@ -1,7 +1,8 @@
 # M0 / 开发阶段 0 验证记录
 
 核验日期：2026-10-09（Asia/Shanghai）。M0 的本地工程基线、案例准备和真实
-环境实测已完成。远端 CI 与独立审查仍待完成，PR 保持草稿，不合并。
+环境实测已完成。2026-10-10 研究者决定暂时跳过离线 runner 对应的远端 CI，
+后续开发以统一的本地检查为准。独立审查待完成，PR 保持草稿，不合并。
 这不是 M1 首版研究闭环的整体验收。
 
 | 条件 | 当前结果 | 证据 |
@@ -16,7 +17,7 @@
 | MCP 取消与恢复 | 通过回收会话方案 | 真实计算开始后取消，停止专用会话，验证 PID 已不存在；新会话计算成功 |
 | 工程基线与离线检查 | 通过 | 清洁虚拟环境按锁文件安装；统一 gate；13 项测试通过 |
 | Gitea Git 访问 | 通过 | 原仓库为空，默认 `main`；基线已推送，功能分支 `feat/cli-agent` |
-| Gitea Actions / runner | 已核对，运行待完成 | 全局 `lab404Runner` 标签匹配，状态 offline；仓库 runner 数 0 |
+| Gitea Actions / runner | 研究者授权暂时跳过 | 全局 `lab404Runner` 状态 offline；远端运行尚未完成，本地检查作为当前开发检查入口 |
 | PR / 独立审查 | 草稿 PR 已创建，独立审查待完成 | 作者自检不等于独立 review 或 approval |
 
 脱敏摘要在 `docs/evidence/m0_environment.json` 和 `docs/evidence/stata_probe.json`。
@@ -66,6 +67,9 @@ Stata 18 本地 SFI 不提供服务尝试调用的 `breakIn`。`stata_control ca
 [已检查的 PR CI](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/actions/runs/768)
 验证代码提交 `0fe80ec` 的实际状态为 queued，不能记作通过。
 JSON 摘要记录了该提交的观察时间；之后的状态文档提交不由该 CI run 覆盖。
+2026-10-10 研究者确认跳过该服务：远端 CI 不再阻塞本阶段和后续开发，
+执行统一本地 gate 并记录结果。保留工作流配置，供服务恢复后重新使用；
+远端实际排队状态与这项开发豁免分别记录。
 独立审查尚未执行，无平台 approval。桌面附件工具拒绝该 Gitea PR URL，
 文档保留普通链接。
 
