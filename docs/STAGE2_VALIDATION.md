@@ -96,9 +96,10 @@ AnalysisBackend 的执行方法现在明确接收 `StataProgram` 并返回 Analy
 
 ## 交付与审阅
 
-分支为 `feat/stage2-stata`。阶段 1 的草稿 PR #2 尚未合并，因此阶段 2 以
-`feat/stage1-state` 为审阅基线，避免重复包含阶段 1 的 diff；阶段 1 合并后再
-调整审阅基线为 main。作者完成本地 diff 自检，独立审阅待完成。
+分支为 `feat/stage2-stata`，交付为
+[草稿 PR #3](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/3)。
+创建前核实阶段 1 的 PR #2 已合并，因此审阅基线为 `main`，只包含阶段 2 的
+增量。作者完成本地 diff 自检，独立审阅待完成。
 远端 lab404Runner 继续按研究者授权跳过，远端 CI 不计为通过，不自动合并。
 
 阶段 2 完成信号满足：真实 AJR 基准通过独立参考核验，证据可读取，执行错误
