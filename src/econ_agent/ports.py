@@ -18,7 +18,15 @@ from econ_agent.stata_contracts import AnalysisOutcome, StataProgram
 class ModelClient(Protocol):
     """中文交互，逐次观察实际请求；重试记录和用量均由适配器提供。"""
 
-    async def decide(self, *, context: str, operation_id: str) -> ModelResponse: ...
+    async def decide(
+        self,
+        *,
+        context: str,
+        operation_id: str,
+        context_design_id: str | None = None,
+        context_result_ids: tuple[str, ...] = (),
+        timeout_seconds: float | None = None,
+    ) -> ModelResponse: ...
 
 
 class AnalysisBackend(Protocol):
@@ -26,9 +34,13 @@ class AnalysisBackend(Protocol):
 
     async def capabilities(self) -> tuple[MethodCapability, ...]: ...
 
-    async def inspect_data(self, input_artifact_id: str) -> str: ...
+    async def inspect_data(
+        self, input_artifact_id: str, *, source_model_call_id: str | None = None
+    ) -> str: ...
 
-    async def get_method_help(self, method: str) -> str: ...
+    async def get_method_help(
+        self, method: str, *, source_model_call_id: str | None = None
+    ) -> str: ...
 
     async def run_analysis(
         self, spec: ExperimentSpec, *, attempt_id: str, program: StataProgram

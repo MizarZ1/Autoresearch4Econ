@@ -685,7 +685,12 @@ class StataBackend:
             return self._outcome(attempt_id, attempt.raw_artifact_id, failure)
 
     async def _query(
-        self, tool_name: str, arguments: dict[str, Any], *, input_id: str | None = None
+        self,
+        tool_name: str,
+        arguments: dict[str, Any],
+        *,
+        input_id: str | None = None,
+        source_model_call_id: str | None = None,
     ) -> dict[str, Any]:
         """一个业务调用包含全部内部 MCP 请求；轮询和生命周期不额外计费。"""
         async with self._lock:
@@ -694,6 +699,7 @@ class StataBackend:
                 run_id=self.store.run_id,
                 operation_id=new_id("operation"),
                 tool_name=tool_name,
+                source_model_call_id=source_model_call_id,
                 arguments_status="pass",
             )
             self.store.record_tool_call(call)
@@ -865,16 +871,23 @@ class StataBackend:
                 )
             return data
 
-    async def inspect_data(self, input_artifact_id: str) -> str:
+    async def inspect_data(
+        self, input_artifact_id: str, *, source_model_call_id: str | None = None
+    ) -> str:
         described = await self._query(
-            "inspect_data", {"action": "describe"}, input_id=input_artifact_id
+            "inspect_data",
+            {"action": "describe"},
+            input_id=input_artifact_id,
+            source_model_call_id=source_model_call_id,
         )
         return json.dumps(
             {"说明": "本机 Stata 读取的变量与数据描述", "data": described}, ensure_ascii=False
         )
 
-    async def get_method_help(self, method: str) -> str:
-        data = await self._query("get_method_help", {"topic": method})
+    async def get_method_help(self, method: str, *, source_model_call_id: str | None = None) -> str:
+        data = await self._query(
+            "get_method_help", {"topic": method}, source_model_call_id=source_model_call_id
+        )
         return json.dumps(
             {"说明": "已保存本机 Stata 帮助原文，请用中文解释适用条件", "data": data},
             ensure_ascii=False,

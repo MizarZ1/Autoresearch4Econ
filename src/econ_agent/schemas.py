@@ -593,6 +593,32 @@ class DesignArguments(Contract):
     based_on_result_ids: tuple[Identifier, ...] = ()
 
 
+Variable = Annotated[str, Field(pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,31}$")]
+
+
+class IVSpecification(Contract):
+    """当前已实现提取规则的 2SLS 口径；其他命令仍走通用执行。"""
+
+    outcome: Variable
+    endogenous: Variable
+    instruments: tuple[Variable, ...] = Field(min_length=1)
+    controls: tuple[Variable, ...] = ()
+    sample_expression: Nonempty
+    covariance: Literal["unadjusted"] = "unadjusted"
+    small_sample: Literal[True] = True
+
+    def command(self) -> str:
+        controls = " ".join(self.controls)
+        instruments = " ".join(self.instruments)
+        return (
+            f"ivregress 2sls {self.outcome} {controls} "
+            f"({self.endogenous}={instruments}) if {self.sample_expression}, small"
+        )
+
+    def variables(self) -> tuple[str, ...]:
+        return (self.outcome, self.endogenous, *self.instruments, *self.controls)
+
+
 class AnalysisArguments(Contract):
     design_id: Identifier
     design_version: int = Field(ge=1)
@@ -604,6 +630,8 @@ class AnalysisArguments(Contract):
     variables: tuple[str, ...]
     sample_rule: Nonempty
     code: Nonempty
+    iv: IVSpecification | None = None
+    retry_attempt_id: Identifier | None = None
     expected_result_type: Literal["coefficients", "scalars", "matrices", "effect_path", "table"]
 
 
