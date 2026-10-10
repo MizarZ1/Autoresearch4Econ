@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "stage": 2,
+  "status": "passed",
+  "started_at": "2026-10-10T07:21:53.147413+00:00",
+  "finished_at": "2026-10-10T07:22:48.749998+00:00",
+  "run_id": "run_stage2_20261010T072153146802",
+  "analysis_backend": "stata",
+  "fixed_developer_scenario": true,
+  "model_requests": 0,
+  "code_sha256": {
+    "scripts/validate_stage2.py": "7f43afb1f08409a18249a88e693ff77e95ccf15397981216832aabfaf5f05af7",
+    "src/econ_agent/__init__.py": "bfd617b41076ff66a4479b7838c2be05a5a02572d861815a1c0484f1c395d533",
+    "src/econ_agent/cli.py": "02afdd94d11b99fbcdbabd9afbdc04da3f563414ac749f05ec1f8ffa62600ed4",
+    "src/econ_agent/config.py": "ca5a7b1d604a52c218a39ca7f210f5e0efcee941f2423dbed390ca1b7a7e91b3",
+    "src/econ_agent/inputs.py": "6167a743025074596920387d2b653347ef5f227419838569eeac47831bb9c338",
+    "src/econ_agent/migrations.py": "c8eadeaec02044e20f17b2cda431f68f81bf303e009a2e703bc746632da936c5",
+    "src/econ_agent/ports.py": "4ec2d24a058f4a36c8d3310d502b5845e9f17fdbeea46b6566afda3271aef155",
+    "src/econ_agent/schemas.py": "3e62196565ae4b234f2f20951fb9372b870b692dabe9b75260b3e1ab37d07267",
+    "src/econ_agent/stata_backend.py": "4e0da0742ca89acd80c130566e0763a0fb9e5b943e6b64d3cb165d2f60cd9a39",
+    "src/econ_agent/stata_contracts.py": "fd13c0c95b7be7356297daa0351dc18e2cb54ee54ca85ceb4c6bb9a525c05b92",
+    "src/econ_agent/stata_mcp.py": "ca6cb59b0c63a41ba306a81e0d20862ce8b41771abe47d65f3a9da9fd9d07326",
+    "src/econ_agent/stata_results.py": "14dd07ccf492a0293c1b1185dab29dea8fa41fb4aa4221b8f66fbee91d5f4c99",
+    "src/econ_agent/stata_transport.py": "a78e5a47015b3cf3f97c6ac611f563f3611112e9c4e8c71de5b3986486779876",
+    "src/econ_agent/state.py": "eadaeadc700f87e69e8fdf63dc0409b06cfbd381fefc113709158fe2eccbd8b4"
+  },
+  "environment": {
+    "mcp_version": "3.3.0",
+    "stata_build": "18.0.185",
+    "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+  },
+  "original_unchanged": true,
+  "recovered_selected_results": 2,
+  "call_summary": {
+    "schema_version": 1,
+    "model_calls": 0,
+    "tool_calls": 10,
+    "model_transport_failures": 0,
+    "model_parse_failures": 0,
+    "tool_failures": 1,
+    "model_retries": 0,
+    "tool_retries": 1,
+    "unfinished_model_calls": 0,
+    "unfinished_tool_calls": 0,
+    "known_total_tokens": null,
+    "missing_total_usage_calls": 0
+  },
+  "cases": {
+    "syntax_failure": {
+      "execution_status": "FAILED",
+      "extraction_status": "PENDING",
+      "attempt_id": "attempt_6ce9910f19ac468a84de43201c9a32da",
+      "attempt_no": 1,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "b53502ff28da5c4eb600f962adc8f990f454aa2623acf735a055035d3d8b3955",
+      "raw_sha256": "524ee3d51b96fa16b022a9885c5236961f1f11ec07a9289c344486c198e9f917",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": "stata",
+      "stata_return_code": 111,
+      "result_id": null,
+      "validation_artifact_id": null
+    },
+    "baseline": {
+      "execution_status": "SUCCEEDED",
+      "extraction_status": "SUCCEEDED",
+      "attempt_id": "attempt_4799355108994f59abd9a1d31e96db76",
+      "attempt_no": 2,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "528ce2788c8aabdce9c5038d27c9fb410c4d08cbaf8107efd9bee0f652331c91",
+      "raw_sha256": "2be022b6ae54e674e5dd0ca6cad9d90eb870bdd48ba88e1f371c33ae83355c00",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": null,
+      "stata_return_code": 0,
+      "result_id": "result_dfff1a796d9d414fb55f26df570bcf9a",
+      "validation_artifact_id": "validation_8c1262558ae54ac09c8c8f910eb7142a",
+      "actual_command": "ivregress 2sls logpgp95  (avexpr=logem4) if baseco==1, small",
+      "sample_size": 64,
+      "estimates": [
+        {
+          "schema_version": 1,
+          "name": "avexpr",
+          "meaning": "avexpr 的 2SLS 系数",
+          "value": 0.9442793851547995,
+          "standard_error": 0.1565254573295791,
+          "confidence_interval": [
+            0.6313894542623475,
+            1.2571693160472515
+          ],
+          "p_value": 9.798644711494116e-08,
+          "degrees_of_freedom": 62.0,
+          "missing_reasons": {}
+        },
+        {
+          "schema_version": 1,
+          "name": "_cons",
+          "meaning": "截距",
+          "value": 1.9096665405467377,
+          "standard_error": 1.0267272828674525,
+          "confidence_interval": [
+            -0.14273205366637143,
+            3.962065134759847
+          ],
+          "p_value": 0.06763719612573942,
+          "degrees_of_freedom": 62.0,
+          "missing_reasons": {}
+        }
+      ]
+    },
+    "latitude": {
+      "execution_status": "SUCCEEDED",
+      "extraction_status": "SUCCEEDED",
+      "attempt_id": "attempt_4ba72d2bd70541a98e8710ed6bb803f6",
+      "attempt_no": 1,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "b21f4c3c9a54289da819e9743a53b326291123c88a1942a49991305fefbbcabb",
+      "raw_sha256": "971f07ff66cfad56b8a47198c7799703f6aa94d62a72b6d330f3cb7a33613895",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": null,
+      "stata_return_code": 0,
+      "result_id": "result_3939afd8117843f4b7d99053ee5b8220",
+      "validation_artifact_id": "validation_85652fb863ed4685ba7088a21c4faa74",
+      "actual_command": "ivregress 2sls logpgp95 lat_abst (avexpr=logem4) if baseco==1, small",
+      "sample_size": 64,
+      "estimates": [
+        {
+          "schema_version": 1,
+          "name": "avexpr",
+          "meaning": "avexpr 的 2SLS 系数",
+          "value": 0.9957040323624361,
+          "standard_error": 0.22168160035208193,
+          "confidence_interval": [
+            0.5524242759389908,
+            1.4389837887858814
+          ],
+          "p_value": 3.207974019833572e-05,
+          "degrees_of_freedom": 61.0,
+          "missing_reasons": {}
+        },
+        {
+          "schema_version": 1,
+          "name": "lat_abst",
+          "meaning": "lat_abst 的 2SLS 系数",
+          "value": -0.6472071456214712,
+          "standard_error": 1.3351409306445932,
+          "confidence_interval": [
+            -3.316986439830491,
+            2.0225721485875487
+          ],
+          "p_value": 0.629591175614749,
+          "degrees_of_freedom": 61.0,
+          "missing_reasons": {}
+        },
+        {
+          "schema_version": 1,
+          "name": "_cons",
+          "meaning": "截距",
+          "value": 1.6918138372968317,
+          "standard_error": 1.2929851024696464,
+          "confidence_interval": [
+            -0.8936696686485703,
+            4.277297343242234
+          ],
+          "p_value": 0.19562748204495675,
+          "degrees_of_freedom": 61.0,
+          "missing_reasons": {}
+        }
+      ]
+    },
+    "general_unparsed": {
+      "execution_status": "SUCCEEDED",
+      "extraction_status": "PENDING",
+      "attempt_id": "attempt_03fef767674447cd9df67c0552958f6f",
+      "attempt_no": 1,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "d40faea2dace993aac79116dac1938648135313216458b819e7c361e6cd7c7fb",
+      "raw_sha256": "c383ef0e4b02a1959d66911a4a7c15abc4d72963f520e45dce88644afab40339",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": null,
+      "stata_return_code": 0,
+      "result_id": null,
+      "validation_artifact_id": null
+    },
+    "real_timeout": {
+      "execution_status": "CANCELLED",
+      "extraction_status": "PENDING",
+      "attempt_id": "attempt_e7801e8e526d4bfe93fa8c317509dd3f",
+      "attempt_no": 1,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "4cca6b4d22b86af5d51d2e9f0fd4e8b3653cc503c456d9b60becc434eb330f31",
+      "raw_sha256": "c53de7261905c28084a833811bfa3276f3e34c38fe2f8a0481fa1357d67c0fd6",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": "timeout",
+      "stata_return_code": null,
+      "result_id": null,
+      "validation_artifact_id": null,
+      "actual_computation_started": true
+    },
+    "real_cancel": {
+      "execution_status": "CANCELLED",
+      "extraction_status": "PENDING",
+      "attempt_id": "attempt_6b15bff1b3ec4f2c8893137496136a3f",
+      "attempt_no": 2,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "9bb6284db3d229d46ac2715401e0b9fd329f141fdab2bfeef76d4be9c85179a8",
+      "raw_sha256": "75db56f63eea5999fb8c593848a7771d7c74040d83284c185669a80fedcf93e4",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": "cancelled",
+      "stata_return_code": null,
+      "result_id": null,
+      "validation_artifact_id": null,
+      "actual_computation_started": true
+    },
+    "fresh_after_cancel": {
+      "execution_status": "SUCCEEDED",
+      "extraction_status": "PENDING",
+      "attempt_id": "attempt_4ffd0deee15b4cb8ac3e56a508ec3e22",
+      "attempt_no": 3,
+      "input_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+      "code_sha256": "067e796f8fc2c9ffdc943b679ed0a906bd6bc3ab3dd9862573e7dcd5f06125ca",
+      "raw_sha256": "9c0b9cd1fa9789ea163419e6d968ff36b636b1f783d5fd77531cf0eb2c773f80",
+      "termination_confirmed": true,
+      "worker_terminated": true,
+      "error_category": null,
+      "stata_return_code": 0,
+      "result_id": null,
+      "validation_artifact_id": null
+    }
+  }
+}
