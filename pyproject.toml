@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "econ-agent"
-version = "0.1.0"
+version = "0.1.0rc1"
 description = "通过 Stata MCP 开展实证经济研究的中文命令行程序"
 requires-python = ">=3.11"
 dependencies = ["openai>=1.100,<3", "pydantic>=2.11,<3"]
@@ -20,6 +20,15 @@ econ-agent = "econ_agent.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/econ_agent"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src/econ_agent", "/scripts", "/tests", "/docs", "/examples/methods",
+  "/examples/quickstart", "/examples/demo/materials", "/examples/demo/reference",
+  "/examples/demo/task.json", "/examples/demo/sources.json", "/.gitea",
+  "/README.md", "/CONTRIBUTING.md", "/CHANGELOG.md", "/AGENTS.md",
+  "/.env.example", "/.gitignore", "/pyproject.toml", "/uv.lock",
+]
 
 [tool.ruff]
 target-version = "py311"

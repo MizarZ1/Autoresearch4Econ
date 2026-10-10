@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "analysis_backend": "stata",
+  "data_path": "synthetic.csv",
+  "dictionary_path": "dictionary.md",
+  "material_paths": ["background.md"],
+  "research_goal": "用项目自编合成数据演示研究闭环。在 included==1 的独立观测中分析 ylinear 与 x 的线性关系，先运行含截距 OLS、常规标准误；读取真实结果后在同一已确认设计内选择一次相关补充分析，可使用 x 的无权重描述统计。调用 review_results 后依据意见决定解释或向研究者提问，最后结束并生成中文初稿。所有数字必须来自真实结果。合成数据只检验工程流程，不作现实因果结论。",
+  "expected_findings": null,
+  "output_language": "zh-CN",
+  "max_research_rounds": 2,
+  "budget": {
+    "schema_version": 1,
+    "max_research_rounds": 2,
+    "max_model_calls": 16,
+    "max_tool_calls": 20,
+    "max_runtime_seconds": 900
+  }
+}
