@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import tarfile
 import tomllib
@@ -51,7 +52,9 @@ def secrets_absent(content: bytes) -> None:
         if any(word in key.upper() for word in ("API_KEY", "TOKEN", "PASSWORD"))
         and len(value) >= 12
     }
-    if any(value in content for value in values) or b"-----BEGIN PRIVATE KEY-----" in content:
+    if any(value in content for value in values) or re.search(
+        rb"(?m)^-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----\r?$", content
+    ):
         raise ValueError("包中检出当前凭证或私钥；禁止发布")
 
 

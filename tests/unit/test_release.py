@@ -2,7 +2,7 @@
 
 import pytest
 
-from scripts.build_release import safe_name, safe_source
+from scripts.build_release import safe_name, safe_source, secrets_absent
 
 
 @pytest.mark.parametrize(
@@ -30,3 +30,14 @@ def test_source_requires_whitelist_and_tracked_members() -> None:
         safe_source("README.md", set())
     with pytest.raises(ValueError):
         safe_source("secret.txt", {"secret.txt"})
+
+
+def test_release_rejects_credentials_and_pem_but_allows_detection_code(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("RELEASE_TEST_API_KEY", "仅供测试的长占位符密钥123456789")
+    with pytest.raises(ValueError):
+        secrets_absent("仅供测试的长占位符密钥123456789".encode())
+    with pytest.raises(ValueError):
+        secrets_absent(b"-----BEGIN RSA PRIVATE KEY-----\n")
+    secrets_absent(b'pattern = b"-----BEGIN PRIVATE KEY-----"')
