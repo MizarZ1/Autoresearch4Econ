@@ -350,6 +350,16 @@ class RunStore:
     def load_task(self) -> ResearchTask:
         return _parse(ResearchTask, self._one("SELECT task_json FROM runs")["task_json"])
 
+    def load_input_manifest(self) -> InputManifest:
+        return _parse(InputManifest, self._one("SELECT input_manifest_json FROM runs")[0])
+
+    def artifacts(self, *, kind: str | None = None) -> tuple[Artifact, ...]:
+        rows = self._all(
+            "SELECT artifact_id FROM artifacts" + (" WHERE kind=?" if kind else ""),
+            (kind,) if kind else (),
+        )
+        return tuple(self._artifact(row[0]) for row in rows)
+
     def load_state(self) -> RunState:
         row = self._one("SELECT * FROM runs")
         return RunState(
@@ -421,6 +431,13 @@ class RunStore:
                 ):
                     raise StateConflict("旧分析尚未确认停止，不能恢复、结束或重复执行")
             if target == RunStatus.RUNNING:
+                if self._all(
+                    "SELECT tool_call_id FROM tool_calls WHERE status='UNKNOWN' AND "
+                    "json_extract(payload_json,'$.error_category')='termination'"
+                    " AND NOT EXISTS(SELECT 1 FROM attempts a WHERE "
+                    "a.tool_call_id=tool_calls.tool_call_id AND a.termination_confirmed=1)"
+                ):
+                    raise StateConflict("遗留业务工具工作进程尚未确认停止，不能恢复执行")
                 if self._file_issues():
                     raise ArtifactIntegrityError("输入或归档文件改变，必须先解决恢复问题")
                 if state.pending_request_ids:
@@ -841,7 +858,7 @@ class RunStore:
             old = self.tool_call(call.tool_call_id)
             if self._all(
                 "SELECT attempt_id FROM attempts WHERE tool_call_id=?", (call.tool_call_id,)
-            ):
+            ) and not (old.status == call.status == CallStatus.PENDING):
                 raise StateConflict("分析工具的终态由对应 attempt 原子更新")
             self._check_call_update(old, call, expected)
             self._write_call("tool_calls", call)
@@ -1104,6 +1121,7 @@ class RunStore:
         duration_seconds: float,
         raw_artifact_id: str | None = None,
         error_summary: str | None = None,
+        error_category: str | None = None,
     ) -> None:
         with self._transaction():
             attempt = self.attempt(attempt_id)
@@ -1150,6 +1168,7 @@ class RunStore:
                     "duration_seconds": duration_seconds,
                     "response_artifact_id": raw_artifact_id,
                     "error_summary": error_summary,
+                    "error_category": error_category,
                 }
             )
             self._write_call("tool_calls", call)
@@ -1160,6 +1179,89 @@ class RunStore:
                 tool_call_id=attempt.tool_call_id,
             )
 
+    def bind_backend_task(self, attempt_id: str, backend_task_id: str) -> None:
+        """收到后台任务 ID 后立即持久化，禁止重连后用新实例冒认旧任务。"""
+        with self._transaction():
+            attempt = self.attempt(attempt_id)
+            if (
+                attempt.execution_status != ExecutionStatus.RUNNING
+                or attempt.executor_id != self.executor_id
+            ):
+                raise StateConflict("任务绑定需要当前执行者持有的运行中尝试")
+            if attempt.backend_task_id is not None and attempt.backend_task_id != backend_task_id:
+                raise StateConflict("后台任务身份不可改写")
+            updated = Attempt.model_validate(
+                attempt.model_dump() | {"backend_task_id": backend_task_id}
+            )
+            self._write_attempt(updated)
+            self._event("backend_task_bound", {}, attempt_id=attempt_id)
+
+    def interrupt_attempt(self, attempt_id: str, *, reason: str) -> None:
+        """终止未确认时保留旧服务身份、取消标记及未知调用，并暂停会话。"""
+        with self._transaction():
+            attempt = self.attempt(attempt_id)
+            if (
+                attempt.execution_status != ExecutionStatus.RUNNING
+                or attempt.executor_id != self.executor_id
+            ):
+                raise StateConflict("只有当前执行者可以登记未确认结束的尝试")
+            self._write_attempt(
+                attempt.model_copy(
+                    update={
+                        "execution_status": ExecutionStatus.INTERRUPTED,
+                        "cancel_requested": True,
+                        "termination_confirmed": False,
+                        "error_summary": reason,
+                    }
+                )
+            )
+            call = self.tool_call(attempt.tool_call_id)
+            self._write_call(
+                "tool_calls",
+                call.model_copy(
+                    update={
+                        "status": CallStatus.UNKNOWN,
+                        "error_category": "termination",
+                        "error_summary": reason,
+                    }
+                ),
+            )
+            if self.load_state().status not in {
+                RunStatus.STOPPED,
+                RunStatus.COMPLETED,
+                RunStatus.FAILED,
+            }:
+                self._set_run_status(RunStatus.PAUSED, reason)
+            self._event("attempt_termination_unknown", {}, attempt_id=attempt_id)
+
+    def mark_extraction(self, attempt_id: str, status: ExtractionStatus, *, reason: str) -> None:
+        """提取失败不改写已经完成的统计执行，也不沿用旧核验。"""
+        if status not in {ExtractionStatus.FAILED, ExtractionStatus.PENDING}:
+            raise StateConflict("成功提取必须通过 save_result 保存实际结果")
+        with self._transaction():
+            attempt = self.attempt(attempt_id)
+            if attempt.execution_status != ExecutionStatus.SUCCEEDED:
+                raise StateConflict("只有成功执行可以登记独立的提取状态")
+            self._write_attempt(
+                attempt.model_copy(
+                    update={
+                        "extraction_status": status,
+                        "error_summary": reason,
+                        "result_artifact_id": None,
+                        "validation_artifact_id": None,
+                    }
+                )
+            )
+            self._connection.execute(
+                "UPDATE experiments SET selected_result_artifact_id=NULL WHERE experiment_id=?",
+                (attempt.experiment_id,),
+            )
+            self._event(
+                "extraction_needs_attention",
+                {"status": status, "reason": reason},
+                attempt_id=attempt_id,
+            )
+
     def confirm_interrupted_stopped(self, attempt_id: str) -> None:
         """调用者须先确认旧服务任务已结束；本方法只记录这项明确的确认。"""
         with self._transaction():
@@ -1168,6 +1270,19 @@ class RunStore:
                 raise StateConflict("只能确认遗留中断尝试的停止状态")
             self._write_attempt(attempt.model_copy(update={"termination_confirmed": True}))
             self._event("interrupted_task_stop_confirmed", {}, attempt_id=attempt_id)
+
+    def confirm_query_stopped(self, tool_call_id: str) -> None:
+        """调用者须先取得旧工作进程退出证据；不改写未知调用为成功。"""
+        with self._transaction():
+            call = self.tool_call(tool_call_id)
+            if call.status != CallStatus.UNKNOWN or call.error_category != "termination":
+                raise StateConflict("只能确认因工作进程终止不明而暂停的业务查询")
+            if self._all("SELECT attempt_id FROM attempts WHERE tool_call_id=?", (tool_call_id,)):
+                raise StateConflict("分析尝试须通过其专用停止确认入口处理")
+            self._write_call(
+                "tool_calls", call.model_copy(update={"error_category": "termination_confirmed"})
+            )
+            self._event("query_worker_stop_confirmed", {}, tool_call_id=tool_call_id)
 
     def _artifact_path(self, relative_path: str) -> Path:
         target = self.directory / relative_path

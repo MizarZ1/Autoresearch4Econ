@@ -12,6 +12,7 @@ from econ_agent.schemas import (
     RunState,
     ToolCall,
 )
+from econ_agent.stata_contracts import AnalysisOutcome, StataProgram
 
 
 class ModelClient(Protocol):
@@ -29,7 +30,9 @@ class AnalysisBackend(Protocol):
 
     async def get_method_help(self, method: str) -> str: ...
 
-    async def run_analysis(self, spec: ExperimentSpec, *, attempt_id: str) -> ExperimentResult: ...
+    async def run_analysis(
+        self, spec: ExperimentSpec, *, attempt_id: str, program: StataProgram
+    ) -> AnalysisOutcome: ...
 
     async def cancel(self, attempt_id: str) -> bool: ...
 

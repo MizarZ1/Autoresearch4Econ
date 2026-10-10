@@ -454,12 +454,16 @@ class MethodCapability(Contract):
     commands: tuple[Nonempty, ...]
     availability: Literal["available", "unavailable", "unknown"] = "unknown"
     validation: Literal["validated", "unverified"] = "unverified"
+    normalization: Literal["supported", "unsupported", "unknown"] = "unknown"
+    normalization_scope: str | None = None
     tested_environment: str | None = None
     validation_scope: str | None = None
     limitations: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def validation_has_evidence(self) -> Self:
+        if self.normalization == "supported" and not self.normalization_scope:
+            raise ValueError("已支持的规范化规则须说明具体命令与推断范围")
         if self.validation == "validated" and (
             not self.tested_environment or not self.validation_scope
         ):
