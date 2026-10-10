@@ -218,3 +218,16 @@ async def test_extra_schema_field_feedback_identifies_rejected_field(model_store
     assert result.action is None and result.error
     assert "type" in result.error.message and "删除" in result.error.message
     assert "input" not in result.error.message
+
+
+async def test_transport_retry_cannot_consume_reserved_paper_call(model_store: RunStore) -> None:
+    transport = SequenceTransport([envelope(), envelope(), RuntimeError("故意失败"), envelope()])
+    model = client(model_store, transport, reserved_model_calls=1)
+    await model.decide(context="动作一", operation_id=new_id("op"))
+    await model.decide(context="动作二", operation_id=new_id("op"))
+    failed = await model.decide(context="动作三", operation_id=new_id("op"))
+    assert failed.error
+    assert len(transport.requests) == len(model_store.model_calls()) == 3
+    with pytest.raises(ModelBudgetExceeded):
+        await model.decide(context="动作不能再占写作调用", operation_id=new_id("op"))
+    assert len(model_store.model_calls()) == 3
