@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "econ-agent"
 version = "0.1.0"
-description = "A CLI harness for empirical economic research through Stata MCP"
+description = "通过 Stata MCP 开展实证经济研究的中文命令行程序"
 requires-python = ">=3.11"
 dependencies = ["openai>=1.100,<3", "pydantic>=2.11,<3"]
 
@@ -34,5 +34,6 @@ strict = true
 files = ["src", "scripts", "tests"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/unit"]
+testpaths = ["tests/unit", "tests/contract"]
+pythonpath = ["."]
 asyncio_mode = "auto"
