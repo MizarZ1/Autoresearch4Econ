@@ -75,7 +75,9 @@ ECON_AGENT_STATA_HOME="$PWD/local_reference/stata18" .venv/bin/python scripts/re
 ## 审阅与远端状态
 
 作者完成本地 diff 和恢复边界自检；独立审阅待完成，不称为独立验证。
-继续使用 `feat/cli-agent` 的草稿 PR #1，不自动合并。研究者已明确授权跳过离线
+阶段 0 PR #1 已于本次远端核对时确认合并；阶段 1 单独使用 `feat/stage1-state`
+的[草稿 PR #2](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/2)，
+不自动合并。研究者已明确授权跳过离线
 `lab404Runner`；当前验收使用本地统一检查，远端 CI 不记作通过。工作流保留。
 
 阶段 1 完成信号已满足：关闭恢复后一致，错误关联及旧设计批准被拒绝，中断

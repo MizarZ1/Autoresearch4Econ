@@ -1,8 +1,9 @@
-# 阶段 0–1 草稿 PR
+# 阶段 1 草稿 PR
 
-[PR #1](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/1)
+[PR #2](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/2)
 
-分支：`feat/cli-agent` → `main`。保持 draft，不合并。
+分支：`feat/stage1-state` → `main`。保持 draft，不合并。
+阶段 0 的 PR #1 已合并，本 PR 只包含阶段 1 的增量。
 独立审阅待完成。2026-10-10 研究者授权暂时跳过离线 runner 的远端 CI，
 当前开发以统一本地检查为准；远端运行尚未完成。真实工具完整状态见 M0_VALIDATION.md。
 
