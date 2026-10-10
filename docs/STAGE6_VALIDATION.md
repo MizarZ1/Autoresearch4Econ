@@ -99,3 +99,6 @@ Git commit 与 dirty 标记仍保留在环境记录中。
 研究者人工抽查或独立 PR 审阅，二者仍待完成。lab404Runner 按原授权跳过，
 远端 CI 不计为通过，草稿 PR 不自动合并。其他方法非系数验证与完整首版交付
 留待阶段 7。
+
+[阶段 6 PR #7](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/7) 为开放草稿，未合并。首次创建时两个远端
+状态 pending、独立审阅为零；授权跳过 runner，不等同于 CI 通过。

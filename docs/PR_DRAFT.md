@@ -1,5 +1,7 @@
 # 阶段 6 草稿 PR
 
+[PR #7](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/7)
+
 分支：`feat/stage6-report` → `main`。阶段 5 的 PR #6 已合并。
 
 从当前明确选用、执行/提取/必需核验通过的结果生成中文论文与表格，结论绑定
@@ -24,3 +26,6 @@ N 和自由度一致，原数据不变。无 MCP/psutil 的核心环境、错误
 
 作者自检完成，独立审阅待完成；lab404Runner 按授权跳过，远端 CI 不记为通过。
 保持 WIP 草稿，不自动合并；阶段 7 尚未开始。
+
+首次创建核对：open、draft=true、未合并、零独立审阅；两个远端状态为 pending。
+Codex 桌面附件工具不支持此 Gitea URL，已尝试关联，使用上方直接链接审阅。
