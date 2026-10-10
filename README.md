@@ -2,8 +2,9 @@
 
 通过 Stata MCP 开展实证经济研究的中文 Python 命令行项目。当前已完成 M1 的
 阶段 0（环境与工程基线）、阶段 1（对象与状态）、阶段 2（首个真实 Stata
-执行闭环）和阶段 3（自有研究循环）。首版后端固定为 `stata`，执行器、存储及
-研究循环 API 已可使用；并发审阅、CLI 人工交互、恢复命令和论文导出在后续阶段实现。
+执行闭环）、阶段 3（自有研究循环）和阶段 4（有界并发审阅）。首版后端固定为
+`stata`，执行器、存储、研究循环和审阅 API 已可使用；CLI 人工交互、恢复命令和
+论文导出在后续阶段实现。
 `start`、`resume`、`status`、`export`
 这些 CLI 命令尚未开放。
 
@@ -117,7 +118,7 @@ uv run --locked --extra stata --group dev python scripts/validate_stage2.py
 设计、有效结果及最近工具反馈。模型生成主体代码；程序控制参数校验、业务调用、
 尝试、核验选择和停止。补充分析必须引用本轮模型请求实际收到的结果 ID。
 读取材料仅开放任务的文字快照，设计变更和实质问题保存后进入人工等待，循环
-不会替研究者答复。`review_results` 的并发实现留待阶段 4。
+不会替研究者答复。配置阶段 4 审阅器后，工具列表开放 `review_results`。
 
 `PersistentModelClient` 使用基础兼容接口，每次实际发送前登记 `model_calls` 并
 归档中文请求，分别记录传输和解析状态、返回模型及原始/已知用量。SDK 隐式重试
@@ -146,6 +147,44 @@ uv run --locked --extra stata --group dev python -m scripts.validate_stage3
 草稿；验收器在循环结束后单独核对参考。设计确认是开发夹具，不能算阶段 5 的
 真实人工修改。原始请求、返回和 trace 在忽略目录，交付证据见
 [阶段 3 验收](docs/STAGE3_VALIDATION.md)。
+
+## 阶段 4 的有界并发审阅
+
+`ResultReviewer` 对同一份当前有效结果并发进行设计一致性审阅和解释/后续分析
+审阅。每项只有一次基础模型请求，没有独立研究循环或隐式重试。同一审阅器实例
+同时最多两项请求，不同批次串行；每项默认超时 60 秒，还受主循环剩余时间限制。
+
+在已经持有运行存储、配置模型和 Stata 后端的协程内接入：
+
+```python
+from econ_agent.harness import ResearchLoop
+from econ_agent.review import ResultReviewer
+
+审阅器 = ResultReviewer(存储, 模型客户端, timeout_seconds=60)
+循环 = ResearchLoop(存储, 模型客户端, Stata后端, 输入快照ID, reviewer=审阅器)
+await 循环.run()
+```
+
+独立调用可用 `await 审阅器.review(ReviewArguments(design_id=当前设计ID,
+result_artifact_ids=当前结果ID元组))`。存储须处于 RUNNING，结果必须已选用且通过
+程序核验。它计一次业务工具调用、两次模型请求，不新增统计尝试。两个请求分别
+保存输入结果、父调用、中文请求、原始响应、意见和用量。请求预算不足两项时不
+发请求，不自动提升预算；用量缺失保留 null。
+
+传输失败、超时、格式或引用错误独立记录，局部失败批次仍返回成功审阅及每项
+错误；取消保留已经完成的输出。审阅期间输入失效则暂停并拒绝作为有效批次。
+完整意见反馈给主循环，但不改变程序核验、结果选择或人工决定。
+
+显式验收复用本机阶段 3 最新成功 run 的两项真实结果，追加两项并发 DeepSeek
+请求及一次接收审阅反馈的后续决策，保存后暂停；不启动 Stata 或下载更新包。
+执行前要求剩余预算足够，已耗尽预算的 run 不能反复调用：
+
+```sh
+uv run --locked --extra stata --group dev python -m scripts.validate_stage4
+```
+
+后续决策在本脚本中只归档，不分发额外统计或论文输出动作。真实请求区间及
+失败留痕见[阶段 4 验收](docs/STAGE4_VALIDATION.md)。完整 CLI 与人工修改留待阶段 5。
 
 ## 本机 Stata 与显式探测
 

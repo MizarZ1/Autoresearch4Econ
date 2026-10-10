@@ -112,4 +112,28 @@ RunStore，不直接调用 MCP 或 SDK。IV 声明属于共用动作契约，通
 
 提出设计或问题进入 WAITING_HUMAN，程序返回而不自动确认。循环结束或预算耗尽
 进入 PAUSED，结论只作为工具返回中的草稿，不伪造阶段 6 论文输出或整项研究完成。
-有未终结调用时拒绝自动推进；完整 CLI 恢复和并发审阅分别属于阶段 5 和阶段 4。
+有未终结调用时拒绝自动推进；完整 CLI 恢复属于阶段 5。
+
+## 阶段 4 的审阅边界
+
+`review.py` 通过小接口 ReviewModelClient 调用两项基础请求：design_consistency
+检查设计与结果对应，interpretation 解释结果并提出有证据依据的建议。共享当前
+设计、确切选中结果、规格及程序核验；不读取参考答案或重新执行统计。
+
+`ResultReviewer` 使用 semaphore 限制同一实例最多两项模型 I/O，批次锁串行不同
+批次。网络等待在短事务之外，`asyncio.gather(return_exceptions=True)` 保留每项
+成功或错误。统一模型适配器为每项执行独立超时，审阅强制零重试；外部取消先
+取消在途请求并归档，已完成的另一项仍保留。异常正文不进入产物。
+
+一次 review_results 对应一个父 tool call 和两个独立 model call。请求分别保存
+parent_tool_call_id、context_design_id、context_result_ids、UTC 起止区间和原始
+usage。结果 ID 列表必须与发送的输入完全匹配，发现及建议只能引用已提供结果。
+两份规范化意见分别归档，并保存一个聚合批次；失败不伪造模型请求、输出或用量。
+
+开始及结束时都重新检查当前确认设计、选用结果和证据 hash；输入失效或留下未知
+调用状态时暂停。意见中的 pass/fail/pending 属于模型判断，不更新 ValidationRecord，
+也不改变结果选择和人工答复。ResearchLoop 只有配置审阅器才开放该动作，把完整
+批次反馈给下一轮模型；不启动额外 Agent runtime，不新增数据库表、迁移或依赖。
+
+批次耗时取整个操作墙钟时间，不将并发请求耗时相加。离线测试用屏障检查两项
+请求同时进入 HTTP 边界；真实验收另以实际模型调用的 UTC 区间重叠作证据。

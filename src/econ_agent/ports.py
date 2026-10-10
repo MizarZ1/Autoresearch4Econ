@@ -9,6 +9,8 @@ from econ_agent.schemas import (
     MethodCapability,
     ModelCall,
     ModelResponse,
+    ReviewResponse,
+    ReviewRole,
     RunState,
     ToolCall,
 )
@@ -27,6 +29,22 @@ class ModelClient(Protocol):
         context_result_ids: tuple[str, ...] = (),
         timeout_seconds: float | None = None,
     ) -> ModelResponse: ...
+
+
+class ReviewModelClient(Protocol):
+    """每项审阅只发送一次基础请求，不创建独立研究循环。"""
+
+    async def review(
+        self,
+        *,
+        context: str,
+        operation_id: str,
+        parent_tool_call_id: str,
+        context_design_id: str,
+        context_result_ids: tuple[str, ...],
+        role: ReviewRole,
+        timeout_seconds: float | None = None,
+    ) -> ReviewResponse: ...
 
 
 class AnalysisBackend(Protocol):
