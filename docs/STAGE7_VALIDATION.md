@@ -117,3 +117,14 @@ python scripts/validate_stage6.py --evidence-prefix stage7_ajr \
 命令缺少实际环境时报告失败，不能当作通过。普通 CI 不需要真实数据、许可或 API。
 lab404Runner 按原授权跳过，不部署新服务，不把远端 pending 当作通过。
 独立审查、人工科学审阅及合并不由工程自检或模型结果审阅代替。
+
+## Gitea 交付记录
+
+[阶段七草稿 PR #8](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/8)
+已创建，open/draft=true，未合并。首次检查 head=0d22a89，base=80c343b，
+独立 review 为零、评论为零，两个远端状态 pending。后续文档提交的最终 head
+以平台及本地交接记录为准；不把 pending 记为 CI 通过。
+
+已有中文实现提交 ab3b2c1 与首版清单提交 0d22a89；作者自检、待推送历史和
+白名单文件审计完成。任务附件工具不支持此 Gitea URL，未伪称附件成功，
+保留可直接访问的 PR 链接。原始数据、数据库、日志、包、许可和厂商程序留本地。
