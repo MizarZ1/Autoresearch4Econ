@@ -12,6 +12,7 @@ from typing import Any
 import econ_agent
 from econ_agent.inputs import prepare_input
 from econ_agent.schemas import (
+    Budget,
     DesignContent,
     ExperimentSpec,
     HumanAnswer,
@@ -57,6 +58,7 @@ async def main() -> int:
             data_path=data,
             research_goal="候选安装包固定合成验收，不是科学研究",
             max_research_rounds=2,
+            budget=Budget(max_research_rounds=2),
         ),
     ) as store:
         record["run_id"] = store.run_id
