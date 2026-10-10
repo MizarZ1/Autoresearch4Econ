@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "econ-agent"
+version = "0.1.0"
+description = "A CLI harness for empirical economic research through Stata MCP"
+requires-python = ">=3.11"
+dependencies = ["openai>=1.100,<3", "pydantic>=2.11,<3"]
+
+[project.optional-dependencies]
+stata = ["mcp-stata==3.3.0", "mcp>=1.26,<2", "numpy==1.26.4", "pandas>=2.2,<3"]
+
+[dependency-groups]
+dev = ["ruff>=0.14,<1", "mypy>=1.18,<2", "pytest>=8,<10", "pytest-asyncio>=1.3,<2"]
+
+[project.scripts]
+econ-agent = "econ_agent.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/econ_agent"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "scripts", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+asyncio_mode = "auto"

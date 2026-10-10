@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "case": "AJR 2001 Table 4",
+  "archive_url": "https://www.dropbox.com/scl/fi/tgs2zy2x6g9cnmberwdno/colonial_origins.zip?rlkey=kumc7exsfl95vv5ejj1w1agup&dl=1",
+  "archive_sha256": "c6868b1b5b12eb6f9b4d68ff3442d482306952bacbe621be597120d217edc38c",
+  "data_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+  "original_code_sha256": "8a65278bf85c7bf84365a790abb09dabf3c94b352407fc95917d6ab9632de989",
+  "data_path": "examples/demo/data/maketable4.dta",
+  "data_dimensions": {
+    "rows": 163,
+    "columns": 10,
+    "baseline_rows": 64
+  },
+  "author_archive": "https://economics.mit.edu/people/faculty/daron-acemoglu/data-archive",
+  "paper_url": "https://economics.mit.edu/sites/default/files/publications/colonial-origins-of-comparative-development.pdf",
+  "retrieved_date": "2026-10-09",
+  "redistribution": "Not confirmed; authors’ data, code and paper remain ignored local files",
+  "fetch_command": "python scripts/fetch_ajr.py"
+}

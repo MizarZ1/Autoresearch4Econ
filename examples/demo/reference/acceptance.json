@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "case": "AJR 2001 Table 4 columns 1-2 and Panel C",
+  "data_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
+  "reference_file": "examples/demo/reference/independent_stata18.json",
+  "reference_code": "examples/demo/reference/ajr_reference.do",
+  "reference_access": "Developer and verifier only; never auto-inject original code or exact reference numbers into the production model",
+  "baseline": {
+    "sample": "baseco == 1",
+    "outcome": "logpgp95",
+    "endogenous_variable": "avexpr",
+    "instrument": "logem4",
+    "controls": [],
+    "inference": "conventional homoskedastic SE, finite-sample degrees of freedom"
+  },
+  "expected_n": 64,
+  "estimators": [
+    "regress",
+    "ivregress 2sls, small"
+  ],
+  "human_modification": {
+    "trigger": "After first baseline results",
+    "request": "加入 lat_abst 控制；保留基准与加控制两个比较规格。",
+    "new_design": "v2 requires confirmation; rerun both baseline and latitude specifications under v2",
+    "old_results": "Historical only; do not combine v1 with v2 current evidence"
+  },
+  "tolerances": {
+    "absolute": 1e-07,
+    "relative": 1e-06,
+    "n_and_df": "exact",
+    "scope": [
+      "coefficient",
+      "standard_error",
+      "excluded_instrument_f"
+    ],
+    "rule": "Only compare results with identical sample, variables, constant and covariance/df conventions"
+  },
+  "permitted_without_new_design": [
+    "first-stage diagnostics within confirmed specifications",
+    "comparison of confirmed OLS and IV specifications",
+    "review of identification assumptions using existing evidence"
+  ],
+  "requires_confirmation": [
+    "change sample",
+    "change instrument",
+    "change outcome",
+    "change covariance convention",
+    "add unapproved controls"
+  ],
+  "forbidden_conclusions": [
+    "OLS proves causality",
+    "a significant first stage proves exclusion restriction",
+    "matching original numbers proves identification",
+    "logem4 is present-day local mortality",
+    "avexpr is expropriation risk increasing with the score",
+    "all 163 observations are the baseline sample",
+    "model-written numbers are actual calculation results"
+  ],
+  "m1_demo_requirements": [
+    "2-3 research rounds using real model and Stata MCP",
+    "real human amendment after observed baseline",
+    "real overlapping independent requests",
+    "pause, exit and resume without repeating completed analysis",
+    "evidence-backed paper and reproducibility export"
+  ]
+}

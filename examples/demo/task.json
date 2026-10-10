@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "analysis_backend": "stata",
+  "data_path": "examples/demo/data/maketable4.dta",
+  "research_goal": "研究制度保护指标与收入水平的关系，比较 OLS 与 IV，报告工具变量前提与局限。",
+  "materials": [
+    "examples/demo/materials/data_dictionary.md",
+    "examples/demo/materials/research_background.md"
+  ],
+  "initial_scope": {
+    "sample": "baseco == 1",
+    "outcome": "logpgp95",
+    "endogenous_variable": "avexpr",
+    "instrument": "logem4",
+    "controls": [],
+    "inference": "conventional homoskedastic SE, finite-sample degrees of freedom"
+  },
+  "requires_design_confirmation": true,
+  "note": "Stage 0 task fixture; start command is not implemented yet. Reference directory is not model input."
+}
