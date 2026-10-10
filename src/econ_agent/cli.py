@@ -105,6 +105,16 @@ def main(argv: list[str] | None = None) -> int:
     status.add_argument("run_id", help="运行 ID")
     status.add_argument("--workspace", type=Path, default=Path.cwd())
     status.add_argument("--json", action="store_true", help="输出脱敏 JSON 状态")
+    export = commands.add_parser("export", help="只读导出现有论文与复现包，不连接模型或 Stata")
+    export.add_argument("run_id", help="运行 ID")
+    export.add_argument("--workspace", type=Path, default=Path.cwd())
+    export.add_argument("--output", type=Path, help="导出目录根目录，默认 workspace/output")
+    report = commands.add_parser("report", help="仅生成论文新版本，不重新执行统计分析")
+    report.add_argument("run_id", help="运行 ID")
+    report.add_argument("--workspace", type=Path, default=Path.cwd())
+    report.add_argument(
+        "--no-model", action="store_true", help="不请求模型，保存明确标记的部分交付"
+    )
     args = parser.parse_args(argv)
     if args.command is None:
         args = parser.parse_args(["start"])
@@ -159,6 +169,22 @@ def research_command(parser: ChineseArgumentParser, args: argparse.Namespace) ->
                 print("已创建运行：" + store.run_id, flush=True)
                 return asyncio.run(conduct(store, workspace=workspace, no_input=args.no_input))
         identifier = TypeAdapter(Identifier).validate_python(args.run_id)
+        if args.command == "export":
+            from econ_agent.exporting import export_run
+
+            with RunStore.open(workspace / "runs" / identifier, writable=False) as store:
+                destination = export_run(store, args.output or workspace / "output")
+            delivery = json.loads((destination / "bundle_manifest.json").read_text())
+            print("交付状态：" + delivery["status"])
+            print("复现包已导出：" + str(destination))
+            return 0
+        if args.command == "report":
+            from econ_agent.reporting import generate_report
+
+            with RunStore.open(workspace / "runs" / identifier) as store:
+                result = asyncio.run(generate_report(store, use_model=not args.no_model))
+                print(f"论文交付：{result['status']}；版本：{result['report_id']}")
+            return 0 if result["status"] == "complete" else 1
         if args.command == "status":
             with RunStore.open(workspace / "runs" / identifier, writable=False) as store:
                 print_status(store, as_json=args.json)
@@ -181,7 +207,7 @@ def research_command(parser: ChineseArgumentParser, args: argparse.Namespace) ->
                 )
             )
     except KeyboardInterrupt:
-        print("已取消输入，尚未启动新的研究操作。", file=sys.stderr)
+        print("已请求取消；已启动操作的终态及未知用量以保存记录为准。", file=sys.stderr)
         return 130
     except ValidationError as exc:
         message = (

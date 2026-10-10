@@ -812,6 +812,8 @@ DesignContent.variables 是实际数据变量名到中文含义的映射，键�
 不能把 outcome、endogenous、instruments、controls 等角色写作变量键。
 DesignContent.sample_rule 必须是可执行的 Stata 条件表达式，不写中文说明；
 run_analysis.sample_rule 逐字复制当前设计，并与 iv.sample_expression 完全一致。
-IV 主体代码的 if 条件须与 iv.sample_expression 一致，包括约定的缺失值筛选。
+IV 主体代码的 if 条件、iv.sample_expression 和 sample_rule 必须逐字相同。
+禁止自行追加 !missing() 等条件；Stata 估计会自动排除所需变量的缺失观测。
+若设计包含缺失值条件则整体复制该设计表达式，不能自行扩展。
 只有 selected_results 中通过核验的结果才可称为有效结果，工具拒绝或失败不表示完成分析。
 """

@@ -51,6 +51,8 @@ class RuntimeConfig:
 
 
 def status_summary(store: RunStore) -> dict[str, Any]:
+    from econ_agent.reporting import current_report
+
     state = store.load_state()
     issues = []
     try:
@@ -59,6 +61,9 @@ def status_summary(store: RunStore) -> dict[str, Any]:
         results = ()
         issues.append("当前结果的文件或核验不满足读取要求，未将其作为有效数值")
     history = []
+    report = current_report(store)
+    if state.status == RunStatus.COMPLETED and report is None:
+        issues.append("已完成时的论文目前未通过证据复核，不能作为当前有效报告")
     for specification in store.experiments():
         history.append(
             {
@@ -90,6 +95,9 @@ def status_summary(store: RunStore) -> dict[str, Any]:
                 "analyses": history,
                 "selected_results": [r.model_dump(mode="json") for r in results],
                 "calls": store.call_summary(),
+                "report": {k: report[k] for k in ("report_id", "status", "issue")}
+                if report
+                else None,
                 "issues": issues,
             }
         ),
@@ -121,6 +129,10 @@ def print_status(store: RunStore, *, as_json: bool = False) -> None:
         f"工具调用：{calls['tool_calls']}，失败：{calls['tool_failures']}，重试：{calls['tool_retries']}，未终结：{calls['unfinished_tool_calls']}"
     )
     print(f"已知总用量：{total_label}；缺失总用量请求：{calls['missing_total_usage_calls']}")
+    if summary["report"]:
+        print(
+            "当前论文：" + summary["report"]["status"] + "；版本：" + summary["report"]["report_id"]
+        )
     if state.stop_reason:
         print("说明：" + state.stop_reason)
     for request in summary["pending_requests"]:
@@ -209,6 +221,13 @@ def stop_snapshot(store: RunStore, workspace: Path) -> Path:
     return destination
 
 
+def stop_delivery(store: RunStore, workspace: Path) -> Path:
+    """停止交互后导出现有记录；缺少有效论文时明确标记部分交付。"""
+    from econ_agent.exporting import export_run
+
+    return export_run(store, workspace / "output")
+
+
 def progress(feedback: dict[str, Any]) -> None:
     names = {
         "run_analysis": "统计分析",
@@ -242,7 +261,7 @@ async def run_research(store: RunStore, config: RuntimeConfig) -> None:
     try:
         log = config.workspace / "local_reference/runtime" / store.run_id / (new_id("mcp") + ".log")
         async with StataMCPTransport(config.executable, config.workspace, log) as stata:
-            model = PersistentModelClient(store, config.model, transport)
+            model = PersistentModelClient(store, config.model, transport, reserved_model_calls=1)
             backend = StataBackend(store, stata, prepared, config.workspace / "tmp/stata")
             loop = ResearchLoop(
                 store,
@@ -251,10 +270,22 @@ async def run_research(store: RunStore, config: RuntimeConfig) -> None:
                 prepared.input_artifact_id,
                 reviewer=ResultReviewer(store, model),
                 on_feedback=progress,
+                reserved_model_calls=1,
             )
             await loop.run()
     finally:
         await transport.close()
+    state = store.load_state()
+    if (
+        state.status == RunStatus.PAUSED
+        and not state.pending_request_ids
+        and (state.stop_reason or "").startswith("研究循环已结束")
+    ):
+        from econ_agent.reporting import generate_report
+
+        print("正在整理当前核验结果并生成论文初稿。", flush=True)
+        report = await generate_report(store)
+        print(f"论文交付：{report['status']}；版本：{report['report_id']}", flush=True)
 
 
 async def conduct(
@@ -346,7 +377,7 @@ async def conduct(
                 if transport:
                     await transport.close()
             if store.load_state().status == RunStatus.STOPPED:
-                print("已有材料快照：" + str(stop_snapshot(store, workspace)))
+                print("已有材料复现包：" + str(stop_delivery(store, workspace)))
                 return 0
             if store.load_state().status == RunStatus.PAUSED:
                 print_status(store)
@@ -393,7 +424,7 @@ async def conduct(
                 if transport:
                     await transport.close()
             if store.load_state().status == RunStatus.STOPPED:
-                print("已有材料快照：" + str(stop_snapshot(store, workspace)))
+                print("已有材料复现包：" + str(stop_delivery(store, workspace)))
                 return 0
             if store.load_state().status == RunStatus.PAUSED:
                 print_status(store)

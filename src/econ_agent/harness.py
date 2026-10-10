@@ -59,7 +59,7 @@ TOOL_DESCRIPTIONS = {
         "局部失败明确保留另一项输出；意见供主循环判断，不修改程序核验或替代人工确认。"
     ),
     "ask_researcher": "提出影响当前设计的问题，保存后暂停等待人工答复。",
-    "finish_research": "结束本阶段研究循环，保存有证据引用的结论草稿；完整论文导出尚未实现。",
+    "finish_research": "结束研究循环并保存结论草稿；随后在预留预算内生成有证据引用的中文论文。",
 }
 
 
@@ -98,6 +98,7 @@ class ResearchLoop:
         max_analysis_repairs: int = 2,
         reviewer: ResultReviewer | None = None,
         on_feedback: Callable[[dict[str, Any]], None] | None = None,
+        reserved_model_calls: int = 0,
     ) -> None:
         if not 1 <= max_consecutive_errors <= 5 or not 0 <= max_analysis_repairs <= 3:
             raise ValueError("循环错误和分析修复上限超出允许范围")
@@ -105,11 +106,15 @@ class ResearchLoop:
         if reviewer is not None and reviewer.store is not store:
             raise ValueError("审阅器与研究循环须使用同一运行存储")
         self.reviewer = reviewer
+        if reserved_model_calls not in {0, 1}:
+            raise ValueError("写作预留调用只能为零或一次")
+        self.reserved_model_calls = reserved_model_calls
         self.on_feedback = on_feedback
         self.input_artifact_id = input_artifact_id
         self.max_errors, self.max_repairs = max_consecutive_errors, max_analysis_repairs
         self.started = time.monotonic()
         self.elapsed_before = 0.0
+        self.writing_seconds_accounted = 0.0
         self.capabilities: tuple[MethodCapability, ...] = ()
         self.data_summary = "尚未检查数据"
         self.materials: list[dict[str, str]] = []
@@ -130,6 +135,7 @@ class ResearchLoop:
                 MethodCapability.model_validate(c) for c in saved["capabilities"]
             )
             self.elapsed_before = saved["elapsed_seconds"]
+            self.writing_seconds_accounted = saved.get("writing_seconds_accounted", 0.0)
             self.errors = saved["consecutive_errors"]
             self.initialized = saved["initialized"]
             if (
@@ -140,6 +146,11 @@ class ResearchLoop:
                 self.feedback = []
                 self.errors = 0
         checkpoint_time = checkpoints[-1].created_at if checkpoints else None
+        from econ_agent.reporting import writing_seconds
+
+        current_writing_seconds = writing_seconds(store)
+        self.elapsed_before += current_writing_seconds - self.writing_seconds_accounted
+        self.writing_seconds_accounted = current_writing_seconds
         for artifact in store.artifacts(kind="tool_response"):
             if (
                 artifact.relative_path.startswith("calls/human/")
@@ -166,6 +177,7 @@ class ResearchLoop:
                         "data_summary": self.data_summary,
                         "capabilities": [c.model_dump(mode="json") for c in self.capabilities],
                         "elapsed_seconds": self.elapsed_before + time.monotonic() - self.started,
+                        "writing_seconds_accounted": self.writing_seconds_accounted,
                         "consecutive_errors": self.errors,
                         "initialized": self.initialized,
                         "design_id": self.store.load_state().current_design_id,
@@ -233,6 +245,7 @@ class ResearchLoop:
                     "state": state.model_dump(mode="json"),
                     "预算使用": self.store.call_summary(),
                     "剩余秒数": max(0, self._remaining()),
+                    "论文写作预留调用": self.reserved_model_calls,
                     "input_artifact_id": self.input_artifact_id,
                     "design": design.model_dump(mode="json") if design else None,
                     "method_capabilities": [c.model_dump(mode="json") for c in self.capabilities],
@@ -395,6 +408,9 @@ class ResearchLoop:
                 "IV 提取声明与方法、变量或样本规格不一致；variables 应按顺序为 "
                 + "、".join(args.iv.variables())
                 + "；method 为 ivregress 2sls"
+                + "；sample_rule、iv.sample_expression 和代码 if 条件均须为 "
+                + design.content.sample_rule
+                + "，不能自行追加 !missing() 等条件"
             )
         if (
             args.method == "ivregress 2sls"
@@ -514,6 +530,11 @@ class ResearchLoop:
         if isinstance(action, ReviewAction):
             if self.reviewer is None:
                 raise ActionRejected("当前循环未配置结果审阅器，工具不可用")
+            if (
+                len(self.store.model_calls()) + 2
+                > self.store.load_state().budget.max_model_calls - self.reserved_model_calls
+            ):
+                raise ActionRejected("余量不足以执行两项审阅并保留论文写作调用")
             self._refs(action.arguments.result_artifact_ids, source_id)
             batch = await self.reviewer.review(
                 action.arguments, source_model_call_id=source_id, timeout_seconds=self._remaining()
@@ -595,7 +616,7 @@ class ResearchLoop:
         if isinstance(action, FinishAction):
             self.store.transition_run(
                 RunStatus.PAUSED,
-                reason="研究循环已结束：" + action.arguments.stop_reason + "；论文导出留待后续阶段",
+                reason="研究循环已结束：" + action.arguments.stop_reason + "；等待论文写作与导出",
             )
         return feedback
 
@@ -621,8 +642,15 @@ class ResearchLoop:
                 state = self.store.load_state()
                 if self._remaining() <= 0:
                     return self._pause("研究运行时间预算已耗尽")
-                if len(self.store.model_calls()) >= state.budget.max_model_calls:
-                    return self._pause("模型调用预算已耗尽")
+                if (
+                    len(self.store.model_calls())
+                    >= state.budget.max_model_calls - self.reserved_model_calls
+                ):
+                    return self._pause(
+                        "研究循环已结束：动作调用预算已用尽，剩余调用预留论文写作"
+                        if self.reserved_model_calls
+                        else "模型调用预算已耗尽"
+                    )
                 if len(self.store.tool_calls()) >= state.budget.max_tool_calls:
                     return self._pause("业务工具调用预算已耗尽")
                 if self.errors >= self.max_errors:

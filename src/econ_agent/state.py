@@ -362,6 +362,16 @@ class RunStore:
         )
         return tuple(self._artifact(row[0]) for row in rows)
 
+    def artifact_index(self, *, kind: str | None = None) -> tuple[Artifact, ...]:
+        """仅列出核对过身份的索引，供损坏披露；不能替代 read_artifact 的文件核验。"""
+        rows = self._all(
+            "SELECT artifact_id FROM artifacts"
+            + (" WHERE kind=?" if kind else "")
+            + " ORDER BY rowid",
+            (kind,) if kind else (),
+        )
+        return tuple(self._indexed_artifact(row[0]) for row in rows)
+
     def load_state(self) -> RunState:
         row = self._one("SELECT * FROM runs")
         return RunState(
@@ -396,6 +406,19 @@ class RunStore:
                 "type": r["event_type"],
                 "payload": json.loads(r["payload_json"]),
                 "created_at": r["created_at"],
+                **{
+                    key: r[key]
+                    for key in (
+                        "run_id",
+                        "design_id",
+                        "experiment_id",
+                        "attempt_id",
+                        "request_id",
+                        "artifact_id",
+                        "model_call_id",
+                        "tool_call_id",
+                    )
+                },
             }
             for r in self._all("SELECT * FROM events ORDER BY sequence")
         ]
@@ -445,6 +468,11 @@ class RunStore:
                 if state.pending_request_ids:
                     target = RunStatus.WAITING_HUMAN
             if target == RunStatus.COMPLETED:
+                from econ_agent.reporting import current_report
+
+                report = current_report(self)
+                if report is None or report["status"] != "complete":
+                    raise StateConflict("没有已发布且通过当前证据复核的完整论文，不能记为完成")
                 if state.pending_request_ids or not self._all(
                     "SELECT artifact_id FROM artifacts WHERE kind='report'"
                 ):
@@ -469,6 +497,28 @@ class RunStore:
                 "run_status_changed", {"from": state.status, "to": target, "reason": reason}
             )
         return self.load_state()
+
+    def begin_report_generation(self) -> None:
+        """单独开启写作，不重跑研究；已完成会话只能通过此入口生成新报告版本。"""
+        with self._transaction():
+            state = self.load_state()
+            if state.status not in {RunStatus.PAUSED, RunStatus.RUNNING, RunStatus.COMPLETED}:
+                raise StateConflict("当前状态不能开启论文写作")
+            if state.pending_request_ids or self._file_issues() or not self.selected_results():
+                raise StateConflict("写作前须解决待答问题及证据核验")
+            for table in ("model_calls", "tool_calls"):
+                if self._all(
+                    f"SELECT operation_id FROM {table} "
+                    "WHERE status IN ('PENDING','RUNNING','UNKNOWN')"
+                ):
+                    raise StateConflict("仍有未终结调用，不能开启写作")
+            if self._all(
+                "SELECT attempt_id FROM attempts WHERE execution_status IN ('PENDING','RUNNING') "
+                "OR (execution_status IN ('INTERRUPTED','CANCELLED') AND termination_confirmed=0)"
+            ):
+                raise StateConflict("统计尝试尚未终结，不能开启写作")
+            self._set_run_status(RunStatus.RUNNING, "正在生成论文新版本，不重新执行分析")
+            self._event("report_generation_started", {"from": state.status})
 
     def advance_round(self, *, expected_round: int) -> None:
         with self._transaction():
@@ -1495,7 +1545,7 @@ class RunStore:
         self._insert("artifacts", fields)
         self._event("artifact_archived", {"kind": artifact.kind}, artifact_id=artifact.artifact_id)
 
-    def _artifact(self, identifier: str, *, kind: str | None = None) -> Artifact:
+    def _indexed_artifact(self, identifier: str) -> Artifact:
         row = self._one(
             "SELECT * FROM artifacts WHERE artifact_id=? AND run_id=?", (identifier, self.run_id)
         )
@@ -1509,6 +1559,10 @@ class RunStore:
             )
         ):
             raise StateFormatError("产物索引与内容身份不一致")
+        return artifact
+
+    def _artifact(self, identifier: str, *, kind: str | None = None) -> Artifact:
+        artifact = self._indexed_artifact(identifier)
         if kind is not None and artifact.kind != kind:
             raise StateConflict("产物种类与用途不一致")
         target = self._artifact_path(artifact.relative_path)
