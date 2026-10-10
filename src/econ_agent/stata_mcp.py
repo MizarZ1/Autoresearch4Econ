@@ -15,6 +15,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.types import CallToolResult
 
+from econ_agent.processes import WorkerIdentity, process_identity
 from econ_agent.state import new_id
 
 REQUIRED_TOOLS = frozenset(
@@ -147,3 +148,6 @@ class StataMCPTransport:
         except ProcessLookupError:
             return False
         return True
+
+    def process_identity(self, pid: int) -> WorkerIdentity | None:
+        return process_identity(pid)

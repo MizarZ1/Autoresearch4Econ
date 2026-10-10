@@ -512,43 +512,56 @@ class RunStore:
         based_on_result_ids: tuple[str, ...] = (),
     ) -> ResearchDesign:
         with self._transaction():
-            if self.load_state().status not in {RunStatus.RUNNING, RunStatus.WAITING_HUMAN}:
-                raise StateConflict("当前会话不能提出研究设计")
-            for artifact_id in based_on_result_ids:
-                self._artifact(artifact_id, kind="result")
-            version = self._one("SELECT COALESCE(MAX(version),0)+1 AS n FROM designs")["n"]
-            design = ResearchDesign(
-                design_id=new_id("design"),
-                run_id=self.run_id,
-                version=version,
-                content=content,
-                change_reason=change_reason,
-                based_on_result_ids=based_on_result_ids,
+            return self._create_design_unlocked(
+                content, change_reason=change_reason, based_on_result_ids=based_on_result_ids
             )
-            self._insert(
-                "designs",
-                {
-                    "design_id": design.design_id,
-                    "run_id": self.run_id,
-                    "version": version,
-                    "payload_json": canonical_json(design),
-                    "content_sha256": content_hash(design),
-                    "confirmation": "PROPOSED",
-                    "created_at": utc_now(),
-                },
-            )
-            # 新设计使旧的待答设计确认过期；确认状态和旧证据仍保留。
-            requests = self._all(
-                "SELECT payload_json FROM human_requests WHERE status='PENDING' AND "
-                "kind='design_confirmation'"
-            )
-            for row in requests:
-                request = _parse(HumanRequest, row[0]).model_copy(update={"status": "CANCELLED"})
-                self._write_request(request)
-                self._event("human_request_superseded", {}, request_id=request.request_id)
-            if requests and not self.load_state().pending_request_ids:
-                self._set_run_status(RunStatus.RUNNING)
-            self._event("design_proposed", {"version": version}, design_id=design.design_id)
+
+    def _create_design_unlocked(
+        self,
+        content: DesignContent,
+        *,
+        change_reason: str,
+        based_on_result_ids: tuple[str, ...] = (),
+        decision_request_id: str | None = None,
+    ) -> ResearchDesign:
+        if self.load_state().status not in {RunStatus.RUNNING, RunStatus.WAITING_HUMAN}:
+            raise StateConflict("当前会话不能提出研究设计")
+        for artifact_id in based_on_result_ids:
+            self._artifact(artifact_id, kind="result")
+        version = self._one("SELECT COALESCE(MAX(version),0)+1 AS n FROM designs")["n"]
+        design = ResearchDesign(
+            design_id=new_id("design"),
+            run_id=self.run_id,
+            version=version,
+            content=content,
+            change_reason=change_reason,
+            based_on_result_ids=based_on_result_ids,
+            decision_request_id=decision_request_id,
+        )
+        self._insert(
+            "designs",
+            {
+                "design_id": design.design_id,
+                "run_id": self.run_id,
+                "version": version,
+                "payload_json": canonical_json(design),
+                "content_sha256": content_hash(design),
+                "confirmation": "PROPOSED",
+                "created_at": utc_now(),
+            },
+        )
+        # 新设计使旧的待答设计确认过期；确认状态和旧证据仍保留。
+        requests = self._all(
+            "SELECT payload_json FROM human_requests WHERE status='PENDING' AND "
+            "kind='design_confirmation'"
+        )
+        for row in requests:
+            request = _parse(HumanRequest, row[0]).model_copy(update={"status": "CANCELLED"})
+            self._write_request(request)
+            self._event("human_request_superseded", {}, request_id=request.request_id)
+        if requests and not self.load_state().pending_request_ids:
+            self._set_run_status(RunStatus.RUNNING)
+        self._event("design_proposed", {"version": version}, design_id=design.design_id)
         return design
 
     def request_human(
@@ -559,47 +572,56 @@ class RunStore:
         kind: Literal["design_confirmation", "research_question"] = "design_confirmation",
     ) -> HumanRequest:
         with self._transaction():
-            state = self.load_state()
-            if state.status != RunStatus.RUNNING or state.pending_request_ids:
-                raise StateConflict("当前会话不能创建新的待答问题")
-            design = self.design(design_id)
-            if kind == "design_confirmation":
-                latest = self._one("SELECT MAX(version) FROM designs")[0]
-                if design.version != latest:
-                    raise StateConflict("只能请求确认最新的设计版本")
-                confirmation = self._one(
-                    "SELECT confirmation FROM designs WHERE design_id=?", (design_id,)
-                )[0]
-                if confirmation != "PROPOSED":
-                    raise StateConflict("已决定的设计不能再次审批，修改须提出新版本")
-            request = HumanRequest(
-                request_id=new_id("human"),
-                run_id=self.run_id,
-                kind=kind,
-                question=question,
-                target_design_id=design_id,
-                target_design_sha256=content_hash(design),
-            )
-            self._insert(
-                "human_requests",
-                {
-                    "request_id": request.request_id,
-                    "run_id": self.run_id,
-                    "kind": kind,
-                    "target_design_id": design_id,
-                    "target_design_sha256": request.target_design_sha256,
-                    "status": request.status,
-                    "payload_json": canonical_json(request),
-                    "created_at": utc_now(),
-                },
-            )
-            self._set_run_status(RunStatus.WAITING_HUMAN)
-            self._event(
-                "human_requested",
-                {"question": question},
-                request_id=request.request_id,
-                design_id=design_id,
-            )
+            return self._request_human_unlocked(design_id, question, kind=kind)
+
+    def _request_human_unlocked(
+        self,
+        design_id: str,
+        question: str,
+        *,
+        kind: Literal["design_confirmation", "research_question"] = "design_confirmation",
+    ) -> HumanRequest:
+        state = self.load_state()
+        if state.status != RunStatus.RUNNING or state.pending_request_ids:
+            raise StateConflict("当前会话不能创建新的待答问题")
+        design = self.design(design_id)
+        if kind == "design_confirmation":
+            latest = self._one("SELECT MAX(version) FROM designs")[0]
+            if design.version != latest:
+                raise StateConflict("只能请求确认最新的设计版本")
+            confirmation = self._one(
+                "SELECT confirmation FROM designs WHERE design_id=?", (design_id,)
+            )[0]
+            if confirmation != "PROPOSED":
+                raise StateConflict("已决定的设计不能再次审批，修改须提出新版本")
+        request = HumanRequest(
+            request_id=new_id("human"),
+            run_id=self.run_id,
+            kind=kind,
+            question=question,
+            target_design_id=design_id,
+            target_design_sha256=content_hash(design),
+        )
+        self._insert(
+            "human_requests",
+            {
+                "request_id": request.request_id,
+                "run_id": self.run_id,
+                "kind": kind,
+                "target_design_id": design_id,
+                "target_design_sha256": request.target_design_sha256,
+                "status": request.status,
+                "payload_json": canonical_json(request),
+                "created_at": utc_now(),
+            },
+        )
+        self._set_run_status(RunStatus.WAITING_HUMAN)
+        self._event(
+            "human_requested",
+            {"question": question},
+            request_id=request.request_id,
+            design_id=design_id,
+        )
         return request
 
     def _write_request(self, request: HumanRequest) -> None:
@@ -610,72 +632,79 @@ class RunStore:
 
     def apply_answer(self, request_id: str, *, design_sha256: str, answer: HumanAnswer) -> RunState:
         with self._transaction():
-            row = self._one(
-                "SELECT * FROM human_requests WHERE request_id=? AND run_id=?",
-                (request_id, self.run_id),
+            return self._apply_answer_unlocked(
+                request_id, design_sha256=design_sha256, answer=answer
             )
-            request = _parse(HumanRequest, row["payload_json"])
-            if design_sha256 != request.target_design_sha256:
-                raise StateConflict("人工答复与请求的设计 hash 不一致")
-            if request.status == "APPLIED":
-                if request.answer != answer:
-                    raise StateConflict("已应用的人工答复不能改写")
-                return self.load_state()
-            state = self.load_state()
-            if request.status != "PENDING" or state.status not in {
-                RunStatus.WAITING_HUMAN,
-                RunStatus.PAUSED,
-            }:
-                raise StateConflict("答复已过期、撤销或不属于当前等待状态")
-            design = self.design(request.target_design_id)
-            if content_hash(design) != design_sha256:
-                raise StateConflict("设计内容已经变化")
-            if answer.decision == "pause":
-                self._set_run_status(RunStatus.PAUSED, answer.explanation)
-                self._event("human_wait_paused", {}, request_id=request_id)
-                return self.load_state()
-            if request.kind == "design_confirmation":
-                if design.version != self._one("SELECT MAX(version) FROM designs")[0]:
-                    raise StateConflict("旧设计批准不能解锁新设计")
-                if answer.decision == "accept":
-                    self._connection.execute(
-                        "UPDATE designs SET confirmation='CONFIRMED' WHERE design_id=?",
-                        (design.design_id,),
-                    )
-                    self._connection.execute(
-                        "UPDATE runs SET current_design_id=? WHERE run_id=?",
-                        (design.design_id, self.run_id),
-                    )
-                elif answer.decision in {"reject", "revise"}:
-                    self._connection.execute(
-                        "UPDATE designs SET confirmation='REJECTED' WHERE design_id=?",
-                        (design.design_id,),
-                    )
-            request = request.model_copy(update={"status": "APPLIED", "answer": answer})
-            self._write_request(request)
-            now = utc_now()
-            self._connection.execute(
-                "UPDATE human_requests SET answered_at=?,applied_at=? WHERE request_id=?",
-                (now, now, request_id),
-            )
-            target = RunStatus.PAUSED if state.status == RunStatus.PAUSED else RunStatus.RUNNING
-            if answer.decision == "stop":
-                if self._all(
-                    "SELECT attempt_id FROM attempts WHERE termination_confirmed=0 AND "
-                    "execution_status!='PENDING'"
-                ):
-                    raise StateConflict("底层任务未确认结束，不能应用停止答复")
-                target = RunStatus.STOPPED
-            self._set_run_status(
-                target,
-                answer.explanation if target in {RunStatus.PAUSED, RunStatus.STOPPED} else None,
-            )
-            self._event(
-                "human_answer_applied",
-                {"decision": answer.decision},
-                request_id=request_id,
-                design_id=design.design_id,
-            )
+
+    def _apply_answer_unlocked(
+        self, request_id: str, *, design_sha256: str, answer: HumanAnswer
+    ) -> RunState:
+        row = self._one(
+            "SELECT * FROM human_requests WHERE request_id=? AND run_id=?",
+            (request_id, self.run_id),
+        )
+        request = _parse(HumanRequest, row["payload_json"])
+        if design_sha256 != request.target_design_sha256:
+            raise StateConflict("人工答复与请求的设计 hash 不一致")
+        if request.status == "APPLIED":
+            if request.answer != answer:
+                raise StateConflict("已应用的人工答复不能改写")
+            return self.load_state()
+        state = self.load_state()
+        if request.status != "PENDING" or state.status not in {
+            RunStatus.WAITING_HUMAN,
+            RunStatus.PAUSED,
+        }:
+            raise StateConflict("答复已过期、撤销或不属于当前等待状态")
+        design = self.design(request.target_design_id)
+        if content_hash(design) != design_sha256:
+            raise StateConflict("设计内容已经变化")
+        if answer.decision == "pause":
+            self._set_run_status(RunStatus.PAUSED, answer.explanation)
+            self._event("human_wait_paused", {}, request_id=request_id)
+            return self.load_state()
+        if request.kind == "design_confirmation":
+            if design.version != self._one("SELECT MAX(version) FROM designs")[0]:
+                raise StateConflict("旧设计批准不能解锁新设计")
+            if answer.decision == "accept":
+                self._connection.execute(
+                    "UPDATE designs SET confirmation='CONFIRMED' WHERE design_id=?",
+                    (design.design_id,),
+                )
+                self._connection.execute(
+                    "UPDATE runs SET current_design_id=? WHERE run_id=?",
+                    (design.design_id, self.run_id),
+                )
+            elif answer.decision in {"reject", "revise"}:
+                self._connection.execute(
+                    "UPDATE designs SET confirmation='REJECTED' WHERE design_id=?",
+                    (design.design_id,),
+                )
+        request = request.model_copy(update={"status": "APPLIED", "answer": answer})
+        self._write_request(request)
+        now = utc_now()
+        self._connection.execute(
+            "UPDATE human_requests SET answered_at=?,applied_at=? WHERE request_id=?",
+            (now, now, request_id),
+        )
+        target = RunStatus.PAUSED if state.status == RunStatus.PAUSED else RunStatus.RUNNING
+        if answer.decision == "stop":
+            if self._all(
+                "SELECT attempt_id FROM attempts WHERE termination_confirmed=0 AND "
+                "execution_status!='PENDING'"
+            ):
+                raise StateConflict("底层任务未确认结束，不能应用停止答复")
+            target = RunStatus.STOPPED
+        self._set_run_status(
+            target,
+            answer.explanation if target in {RunStatus.PAUSED, RunStatus.STOPPED} else None,
+        )
+        self._event(
+            "human_answer_applied",
+            {"decision": answer.decision},
+            request_id=request_id,
+            design_id=design.design_id,
+        )
         return self.load_state()
 
     def create_experiment(self, spec: ExperimentSpec) -> None:
@@ -702,6 +731,111 @@ class RunStore:
             )
             self._event(
                 "experiment_created", {"purpose": spec.purpose}, experiment_id=spec.experiment_id
+            )
+
+    def human_request(self, request_id: str) -> HumanRequest:
+        return _parse(
+            HumanRequest,
+            self._one(
+                "SELECT payload_json FROM human_requests WHERE request_id=? AND run_id=?",
+                (request_id, self.run_id),
+            )[0],
+        )
+
+    def human_requests(self) -> tuple[HumanRequest, ...]:
+        return tuple(
+            _parse(HumanRequest, r[0])
+            for r in self._all("SELECT payload_json FROM human_requests ORDER BY rowid")
+        )
+
+    def designs(self) -> tuple[ResearchDesign, ...]:
+        return tuple(
+            self.design(r[0]) for r in self._all("SELECT design_id FROM designs ORDER BY version")
+        )
+
+    def design_confirmation(self, design_id: str) -> str:
+        self.design(design_id)
+        return cast(
+            str, self._one("SELECT confirmation FROM designs WHERE design_id=?", (design_id,))[0]
+        )
+
+    def experiments(self) -> tuple[ExperimentSpec, ...]:
+        return tuple(
+            self.experiment(r[0])
+            for r in self._all("SELECT experiment_id FROM experiments ORDER BY rowid")
+        )
+
+    def load_config(self) -> dict[str, JsonValue]:
+        return cast(dict[str, JsonValue], json.loads(self._one("SELECT config_json FROM runs")[0]))
+
+    def revise_answer(
+        self, request_id: str, *, design_sha256: str, answer: HumanAnswer, content: DesignContent
+    ) -> HumanRequest:
+        """人工答复、新版本及其待确认请求在同一事务内保存；不自动批准修改。"""
+        content = DesignContent.model_validate(content)
+        if answer.decision != "revise":
+            raise StateConflict("创建修改版本必须来自人工修改意见")
+        with self._transaction():
+            request = self.human_request(request_id)
+            if request.target_design_sha256 != design_sha256:
+                raise StateConflict("修改意见与原请求的设计 hash 不一致")
+            if request.status == "APPLIED":
+                versions = [d for d in self.designs() if d.decision_request_id == request_id]
+                if request.answer != answer or len(versions) != 1 or versions[0].content != content:
+                    raise StateConflict("已应用的修改意见不能改写或重复创建版本")
+                return next(
+                    r
+                    for r in self.human_requests()
+                    if r.target_design_id == versions[0].design_id
+                    and r.kind == "design_confirmation"
+                )
+            if content == self.design(request.target_design_id).content:
+                raise StateConflict("修改内容与原设计相同，请澄清具体变化")
+            based_on = tuple(r.result_id for r in self.selected_results() if r.result_id)
+            self._apply_answer_unlocked(request_id, design_sha256=design_sha256, answer=answer)
+            # 从暂停收到反馈仍先回到待确认，不跳过新版本的确认。
+            if self.load_state().status == RunStatus.PAUSED:
+                self._set_run_status(RunStatus.RUNNING)
+            design = self._create_design_unlocked(
+                content,
+                change_reason=answer.explanation,
+                based_on_result_ids=based_on,
+                decision_request_id=request_id,
+            )
+            return self._request_human_unlocked(
+                design.design_id,
+                "请确认按你的反馈生成的新设计；确认后旧版本结果仅作为历史保留，并执行当前版本分析。",
+            )
+
+    def close_interrupted_call(self, identifier: str, *, model: bool) -> None:
+        """关闭本地遗留调用，保留服务端状态及用量未知，不改记成功或自动重发。"""
+        with self._transaction():
+            call = self.model_call(identifier) if model else self.tool_call(identifier)
+            if call.status != CallStatus.UNKNOWN:
+                raise StateConflict("只能核对并关闭遗留的未知调用")
+            if not model:
+                attempts = [
+                    self.attempt(r[0])
+                    for r in self._all(
+                        "SELECT attempt_id FROM attempts WHERE tool_call_id=?", (identifier,)
+                    )
+                ]
+                if any(not a.termination_confirmed for a in attempts):
+                    raise StateConflict("分析工作进程未确认停止，不能关闭父调用")
+            updated = call.model_copy(
+                update={
+                    "status": CallStatus.CANCELLED,
+                    "ended_at": utc_now(),
+                    "duration_seconds": None,
+                    "error_category": "interrupted",
+                    "error_summary": "本地遗留调用已中断关闭；服务端处理、耗时及未返回用量保持未知",
+                }
+            )
+            self._write_call("model_calls" if model else "tool_calls", updated)
+            self._event(
+                "interrupted_call_closed",
+                {"server_outcome": "unknown"},
+                **({"model_call_id": identifier} if model else {"tool_call_id": identifier}),
             )
 
     def experiment(self, experiment_id: str) -> ExperimentSpec:
@@ -798,7 +932,17 @@ class RunStore:
         with self._transaction():
             if call.status != CallStatus.PENDING:
                 raise StateConflict("请求发送前必须先登记 PENDING 调用")
-            if self.load_state().status != RunStatus.RUNNING:
+            state = self.load_state()
+            human_interpretation = (
+                isinstance(call, ModelCall)
+                and call.purpose == "解析研究者反馈"
+                and state.status == RunStatus.WAITING_HUMAN
+                and any(
+                    self.human_request(r).target_design_id == call.context_design_id
+                    for r in state.pending_request_ids
+                )
+            )
+            if state.status != RunStatus.RUNNING and not human_interpretation:
                 raise StateConflict("当前会话不能发起新的调用")
             self._validate_call_refs(call)
             budget = self.load_state().budget

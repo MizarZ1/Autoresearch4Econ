@@ -2,11 +2,9 @@
 
 通过 Stata MCP 开展实证经济研究的中文 Python 命令行项目。当前已完成 M1 的
 阶段 0（环境与工程基线）、阶段 1（对象与状态）、阶段 2（首个真实 Stata
-执行闭环）、阶段 3（自有研究循环）和阶段 4（有界并发审阅）。首版后端固定为
-`stata`，执行器、存储、研究循环和审阅 API 已可使用；CLI 人工交互、恢复命令和
-论文导出在后续阶段实现。
-`start`、`resume`、`status`、`export`
-这些 CLI 命令尚未开放。
+执行闭环）、阶段 3（自有研究循环）、阶段 4（有界并发审阅）和阶段 5（CLI 与
+人工恢复）。首版后端固定为 `stata`，已开放 `start`、`resume`、`status` 与明确
+交互点的人工反馈。论文、完整复现包与 `export` 命令属于阶段 6，尚未开放。
 
 文档、代码说明、终端提示、模型交互与新增提交说明统一使用中文。JSON 字段名、
 动作名、状态枚举、命令及软件包名称保留协议规定的拼写。
@@ -184,7 +182,7 @@ uv run --locked --extra stata --group dev python -m scripts.validate_stage4
 ```
 
 后续决策在本脚本中只归档，不分发额外统计或论文输出动作。真实请求区间及
-失败留痕见[阶段 4 验收](docs/STAGE4_VALIDATION.md)。完整 CLI 与人工修改留待阶段 5。
+失败留痕见[阶段 4 验收](docs/STAGE4_VALIDATION.md)。CLI 与人工恢复用法见下节。
 
 ## 本机 Stata 与显式探测
 
@@ -218,6 +216,50 @@ AJR 参考脚本由开发者独立编写，在新进程中运行，不使用模�
 `ivreg` 与 `ivregress 2sls, small` 的系数、标准误及自由度已核对；参考采用同方差
 常规标准误和有限样本修正。任务只读取数据、项目字典和背景，参考值及作者原
 代码保留给开发者和验收器，不注入模型任务材料。
+
+## 阶段 5 的 CLI 与人工恢复
+
+在项目根目录、已安装环境中运行，`RUN_ID` 换成 `start` 打印的运行 ID：
+
+```sh
+.venv/bin/econ-agent start --task examples/demo/task.json
+.venv/bin/econ-agent resume RUN_ID
+.venv/bin/econ-agent status RUN_ID --json
+```
+
+直接运行 `.venv/bin/econ-agent` 或 `start` 不带 `--task`，会询问数据、研究目标、
+材料和变量字典路径。任务相对路径以任务文件目录为基准。`--workspace` 指定
+`runs/`、`backups/`、`tmp/`、`output/` 的根目录，恢复及查询使用同一根目录。
+后端优先取 `start --backend`，其次任务文件，默认 `stata`；其他后端在创建会话
+前拒绝。`resume` 保留已保存的 Stata 后端，不接受后端覆盖。
+
+首次方案展示后输入 `/accept` 才能执行。自然语言或 `/revise <说明>` 由模型
+解释为完整新设计，展示变化后再次等待确认；模型不能自行批准。变量表使用
+“实际数据列名 → 中文含义”，样本规则使用可执行的 Stata 条件表达式。
+`/reject <理由>` 记录拒绝并交回研究循环；`/pause` 保留原问题；`/stop` 停止并
+写入本地材料快照，包含当前有效结果、相关代码和分析历史，排除模型原始请求、
+响应、备份和历史报告。快照尚不是可独立运行的阶段 6 复现包。
+
+Ctrl+C 先回收在途操作、保存后退出。非交互终端或 `--no-input` 在待答时退出并
+保留原问题，不自动确认。也可从打印或 `status --json` 的请求中取 ID 与设计 hash：
+
+```sh
+.venv/bin/econ-agent resume RUN_ID --no-input --answer '/accept' \
+  --request-id REQUEST_ID --design-sha256 DESIGN_HASH
+```
+
+答复绑定请求及设计版本；重复答复不重复推进，旧答复不能解锁新设计。没有待答
+问题的暂停会话可用 `resume RUN_ID --feedback '修改意见' --no-input` 补充指令。
+正常结束研究循环后的普通 `resume` 只显示保存状态，不重跑已完成分析。
+`status` 只读数据库，环境密钥缺失、Stata/MCP 不可用时仍可查询，未知用量保持
+`null`。恢复遗留任务时核对专用工作进程的 PID、出生时间及可执行文件；身份
+不足或无法确认退出时保持暂停，不向新 MCP 服务查询旧任务 ID。
+
+本阶段真实验证使用既有 DeepSeek 配置及本机 Stata 18.0.185，未下载更新包。
+按研究者“你自行选择最优”的授权，为工程验收选择 `baseco==1 & lat_abst>0`，
+样本从 64 改为 63，实际代码及独立 Stata 数值对照通过。规则输入和 `/accept`
+为开发脚本，与原始授权分别保存；不宣称统计最优或研究者另行审阅确认。
+具体失败留痕、额外同规格分析及验收命令见[阶段 5 验收](docs/STAGE5_VALIDATION.md)。
 
 ## 依赖与证据
 

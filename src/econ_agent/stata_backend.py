@@ -145,7 +145,30 @@ class StataBackend:
         )
         return result
 
-    async def _create_session(self, scope: _Session) -> None:
+    async def _create_session(
+        self, scope: _Session, *, tool_call_id: str, attempt_id: str | None = None
+    ) -> None:
+        intent = {
+            "schema_version": 1,
+            "run_id": self.store.run_id,
+            "tool_call_id": tool_call_id,
+            "attempt_id": attempt_id,
+            "service_instance_id": self.transport.service_instance_id,
+            "session_id": scope.name,
+        }
+        design_id = (
+            self.store.experiment(self.store.attempt(attempt_id).experiment_id).design_id
+            if attempt_id
+            else None
+        )
+        self.store.archive_bytes(
+            f"calls/workers/{tool_call_id}/intent.json",
+            json.dumps(intent).encode(),
+            kind="tool_response",
+            tool_call_id=tool_call_id,
+            attempt_id=attempt_id,
+            design_id=design_id,
+        )
         scope.ready.clear()
         scope.dispatched = True
         try:
@@ -166,6 +189,22 @@ class StataBackend:
                 raise _ExecutionFailure(
                     "termination", "无法取得专用工作进程身份，禁止假定可安全重试"
                 )
+            inspector = getattr(self.transport, "process_identity", None)
+            identity = inspector(scope.pid) if inspector else None
+            self.store.archive_bytes(
+                f"calls/workers/{tool_call_id}/identity.json",
+                json.dumps(
+                    intent
+                    | {
+                        "worker_pid": scope.pid,
+                        "identity": identity.model_dump(mode="json") if identity else None,
+                    }
+                ).encode(),
+                kind="tool_response",
+                tool_call_id=tool_call_id,
+                attempt_id=attempt_id,
+                design_id=design_id,
+            )
             configured = await self._call(
                 scope,
                 "stata_run",
@@ -393,7 +432,9 @@ class StataBackend:
                         "主体代码须使用工作副本，不能声明原件、备份或不可变快照为写入路径",
                     )
                 working_copy(self.store, self.prepared, work)
-                await self._create_session(scope)
+                await self._create_session(
+                    scope, tool_call_id=attempt.tool_call_id, attempt_id=attempt_id
+                )
                 detected = await self._call(
                     scope,
                     "stata_manage_session",
@@ -723,7 +764,7 @@ class StataBackend:
                     r"[A-Za-z_][A-Za-z0-9_ ]{0,63}", str(arguments.get("topic", ""))
                 ):
                     raise _ExecutionFailure("arguments", "帮助主题只允许命令及子主题名称")
-                await self._create_session(scope)
+                await self._create_session(scope, tool_call_id=call.tool_call_id)
                 if input_id:
                     if input_id != self.prepared.input_artifact_id:
                         raise ValueError("数据检查输入不属于已保护的任务")

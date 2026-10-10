@@ -17,6 +17,7 @@ from econ_agent.schemas import (
     ACTION_ADAPTER,
     MODEL_SYSTEM_PROMPT_ZH,
     CallStatus,
+    HumanFeedback,
     ModelCall,
     ModelFailure,
     ModelResponse,
@@ -213,6 +214,37 @@ class PersistentModelClient:
             max_transport_retries=0,
         )
         return ReviewResponse(model_call=call, report=report, error=error)
+
+    async def interpret_feedback(
+        self,
+        *,
+        context: str,
+        operation_id: str,
+        context_design_id: str,
+        context_result_ids: tuple[str, ...] = (),
+        timeout_seconds: float | None = None,
+    ) -> tuple[ModelCall, HumanFeedback | None, ModelFailure | None]:
+        return await self._request(
+            context=context,
+            operation_id=operation_id,
+            context_design_id=context_design_id,
+            context_result_ids=context_result_ids,
+            timeout_seconds=timeout_seconds,
+            purpose="解析研究者反馈",
+            prompt_version="human-feedback-zh-1",
+            system_prompt=(
+                "你只将研究者原始中文意见转换为 HumanFeedback JSON 实例，不执行研究。"
+                "decision 为 accept、revise、reject 或 clarify；修改时返回完整 revised_design。"
+                "保留未涉及的原设计字段，不杜撰研究者选择；含糊且未授权选择时返回 clarify。"
+                "研究者明确授权自行选择时可提出有理由的修改，但新版本仍需要确认。"
+                "如果要求修改，应输出 revise，不得把修改误作 accept。"
+                "所有说明使用中文；不要复制 schema 或加入额外字段。"
+                "revised_design.variables 的键是实际数据列名，值是中文含义；"
+                "不得使用 outcome、endogenous、instruments、controls 等角色作为键。"
+            ),
+            parser=TypeAdapter(HumanFeedback),
+            max_transport_retries=0,
+        )
 
     async def _request(
         self,

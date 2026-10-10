@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import json
 import time
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -96,6 +97,7 @@ class ResearchLoop:
         max_consecutive_errors: int = 2,
         max_analysis_repairs: int = 2,
         reviewer: ResultReviewer | None = None,
+        on_feedback: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         if not 1 <= max_consecutive_errors <= 5 or not 0 <= max_analysis_repairs <= 3:
             raise ValueError("循环错误和分析修复上限超出允许范围")
@@ -103,6 +105,7 @@ class ResearchLoop:
         if reviewer is not None and reviewer.store is not store:
             raise ValueError("审阅器与研究循环须使用同一运行存储")
         self.reviewer = reviewer
+        self.on_feedback = on_feedback
         self.input_artifact_id = input_artifact_id
         self.max_errors, self.max_repairs = max_consecutive_errors, max_analysis_repairs
         self.started = time.monotonic()
@@ -129,6 +132,22 @@ class ResearchLoop:
             self.elapsed_before = saved["elapsed_seconds"]
             self.errors = saved["consecutive_errors"]
             self.initialized = saved["initialized"]
+            if (
+                saved.get("design_id", store.load_state().current_design_id)
+                != store.load_state().current_design_id
+            ):
+                # 确认新设计后旧反馈只留在历史，不能促使模型沿用旧数值或结束动作。
+                self.feedback = []
+                self.errors = 0
+        checkpoint_time = checkpoints[-1].created_at if checkpoints else None
+        for artifact in store.artifacts(kind="tool_response"):
+            if (
+                artifact.relative_path.startswith("calls/human/")
+                and artifact.relative_path.endswith("/interpretation.json")
+                and (checkpoint_time is None or artifact.created_at > checkpoint_time)
+            ):
+                interpretation = json.loads(store.read_artifact(artifact.artifact_id))
+                self.elapsed_before += float(interpretation.get("processing_seconds", 0))
 
     def _remaining(self) -> float:
         return self.store.load_state().budget.max_runtime_seconds - (
@@ -149,6 +168,7 @@ class ResearchLoop:
                         "elapsed_seconds": self.elapsed_before + time.monotonic() - self.started,
                         "consecutive_errors": self.errors,
                         "initialized": self.initialized,
+                        "design_id": self.store.load_state().current_design_id,
                         "state": self.store.load_state().model_dump(mode="json"),
                         "reason": reason,
                     }
@@ -220,6 +240,11 @@ class ResearchLoop:
                     "materials": self.materials,
                     "selected_results": [r.model_dump(mode="json") for r in selected],
                     "recent_feedback": self.feedback[-8:],
+                    "human_history": [
+                        r.model_dump(mode="json")
+                        for r in self.store.human_requests()
+                        if r.status == "APPLIED"
+                    ][-8:],
                     "tools": tool_descriptions(reviews_enabled=self.reviewer is not None),
                 }
             ),
@@ -555,7 +580,7 @@ class ResearchLoop:
                     conclusion_draft=action.arguments.conclusion_draft,
                     evidence_artifact_ids=action.arguments.evidence_artifact_ids,
                     stop_reason=action.arguments.stop_reason,
-                    limitation="阶段 3 结论草稿，不是完整论文或首版交付",
+                    limitation="研究结论草稿，不是完整论文或首版交付",
                 )
             else:
                 raise ActionRejected("动作尚未提供可执行实现")
@@ -634,6 +659,8 @@ class ResearchLoop:
                         )
                         feedback = self._reject(response.action, source_id, message)
                 self.feedback.append(feedback)
+                if self.on_feedback:
+                    self.on_feedback(feedback)
                 self.errors = self.errors + 1 if feedback.get("error") else 0
                 self._checkpoint()
             return self.store.load_state().stop_reason or "等待研究者答复"
