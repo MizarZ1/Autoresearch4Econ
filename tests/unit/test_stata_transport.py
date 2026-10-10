@@ -1,4 +1,4 @@
-"""Verify actual file-descriptor isolation without requiring Stata or MCP."""
+"""无需 Stata 或 MCP 的实际文件描述符隔离测试。"""
 
 import json
 import subprocess

@@ -1,4 +1,4 @@
-"""Offline installation, scope, and secret-handling checks."""
+"""安装、后端范围与凭证处理的离线检查。"""
 
 import json
 import subprocess
@@ -78,3 +78,15 @@ def test_installed_module_entry_point() -> None:
     )
     assert result.returncode == 0
     assert result.stdout.strip() == "0.1.0"
+
+
+def test_help_and_parameter_errors_use_chinese(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as help_exit:
+        main(["--help"])
+    assert help_exit.value.code == 0
+    help_text = capsys.readouterr().out
+    assert "用法：" in help_text and "命令:" in help_text and "显示帮助并退出" in help_text
+    with pytest.raises(SystemExit) as error_exit:
+        main(["doctor", "--backend", "python"])
+    assert error_exit.value.code == 2
+    assert "首版仅支持 stata 后端" in capsys.readouterr().err

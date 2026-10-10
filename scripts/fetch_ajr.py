@@ -1,4 +1,4 @@
-"""Download verified AJR inputs locally; never redistribute the authors' files."""
+"""获取并校验本地 AJR 输入；作者文件仅保留本机。"""
 
 import hashlib
 import io
@@ -18,7 +18,7 @@ DATA_HASH = "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404"
 
 def verify(payload: bytes, expected: str) -> None:
     if hashlib.sha256(payload).hexdigest() != expected:
-        raise ValueError("AJR checksum changed; stop and review source before updating hashes")
+        raise ValueError("AJR 校验值发生变化，请先核对来源再更新校验基准")
 
 
 def main() -> int:
@@ -44,7 +44,7 @@ def main() -> int:
             destination = original / filename
             content = table4.read(filename)
             if destination.exists() and destination.read_bytes() != content:
-                raise ValueError(f"Existing original differs: {filename}; preserve it for review")
+                raise ValueError(f"已有作者原件与来源不同：{filename}；请保留原件并核对")
             destination.write_bytes(content)
     analysis_copy = ROOT / "examples/demo/data/maketable4.dta"
     analysis_copy.parent.mkdir(parents=True, exist_ok=True)
@@ -52,7 +52,7 @@ def main() -> int:
         verify(analysis_copy.read_bytes(), DATA_HASH)
     else:
         shutil.copy2(original / "maketable4.dta", analysis_copy)
-    print("Verified archive and Table 4; originals and analysis copy are local-only.")
+    print("压缩包和 Table 4 校验通过；作者原件及分析副本仅保留本机。")
     return 0
 
 

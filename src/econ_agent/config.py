@@ -1,4 +1,4 @@
-"""Non-secret configuration; credentials remain in the process environment."""
+"""非敏感配置；凭证只从进程环境读取。"""
 
 import os
 from dataclasses import dataclass
@@ -20,11 +20,11 @@ class ModelConfig:
         )
         parsed = urlsplit(config.base_url)
         if parsed.scheme not in {"https", "http"} or not parsed.hostname:
-            raise ValueError("Model endpoint must be an HTTP(S) URL")
+            raise ValueError("模型端点必须是 HTTP(S) 地址")
         if parsed.username or parsed.password or parsed.query or parsed.fragment:
-            raise ValueError("Model endpoint must not contain credentials, query, or fragment")
+            raise ValueError("模型端点不能包含凭证、查询参数或片段")
         if not config.model or not config.key_variable:
-            raise ValueError("Model name and key variable must not be empty")
+            raise ValueError("模型名与密钥环境变量名不能为空")
         return config
 
     def api_key(self) -> str | None:

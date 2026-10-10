@@ -1,32 +1,62 @@
-# Stage 0 boundaries
+# 阶段 1 架构与状态约定
 
-`cli.py` currently parses arguments and inspects configuration. `config.py` stores
-endpoint/model/key-variable names but never copies the key into an artifact.
-`stata_transport.py` isolates native stdout from protocol stdout on POSIX and
-starts the fixed third-party server; it owns no research control flow.
+`cli.py` 负责中文配置检查和退出码。`config.py` 保存端点、模型与密钥变量名，
+密钥只在请求时读取，不进入产物。`stata_transport.py` 在 POSIX 上隔离原生输出
+和协议 stdout，启动固定版本原样服务。生产研究循环和执行器在后续阶段实现。
 
-`scripts/` contains explicit developer commands for checks, data acquisition,
-independent Stata reference execution and live model/MCP probes. Imports and the
-quality gate do not run these external probes. Independent reference execution
-is an acceptance tool, not a second production backend.
+## 对象与接口
 
-Stages 1–7 will introduce the small ModelClient, AnalysisBackend and RunStore
-interfaces, nine SQLite tables and the project-owned research loop. No empty
-placeholder implementation or Python statistics backend is included in stage 0.
-Task/reference/evidence records use `schema_version: 1`; no database format exists
-yet. Application version 0.1.0 is separate from future schema/design versions.
+`schemas.py` 定义 v1 任务、预算、设计、分析规格、尝试、产物、人工请求、模型与
+工具调用及动作的辨识联合。输出支持系数、标量、矩阵、效应路径和表格；缺失
+推断字段用 null 加原因表示，禁止非有限数值。执行状态、提取状态与核验状态
+各有契约。中文系统提示与交互语言字段固定为 zh-CN，协议标识保持标准拼写。
 
-The pinned MCP server offers broad tools. Future adapters must expose only the
-required generic execution, inspection, help, result and lifecycle tools to the
-project loop. The third-party research-agent tools are not used. Model outputs
-must never determine reference answers or claim mock computations were real.
+`ports.py` 的 ModelClient 返回动作或统一错误，附带逐次模型调用和用量；
+AnalysisBackend 隔离能力、帮助、检查、执行和取消；RunStorePort 隔离状态与
+证据选择。这里只定义边界，不创建空的生产后端或替代研究循环。
 
-Cancellation must include evidence that the underlying Stata execution ended.
-The Stata 18 runtime lacks the `sfi.breakIn` hook expected by the pinned server;
-a cancelled background task alone is insufficient. Stage 0 probes verified the
-hard-stop strategy: cancel the task, terminate its MCP session, confirm the worker
-has exited, then start a fresh session. The accepted analysis path uses saved
-do-files, `set processors 1`, and the updated local Stata copy. Inline multiline
-analysis and unrestricted processors can still crash. See M0_VALIDATION.md.
-Stage 2 must carry the verified behavior into the
-AnalysisBackend cancellation contract and reject late/cancelled results.
+## 九表与事务
+
+`migrations.py` 直接创建九表 SQLite v1：runs、designs、experiments、attempts、
+artifacts、human_requests、events、model_calls、tool_calls。`PRAGMA user_version`
+是数据库版本；对象 schema_version、应用版本及设计版本独立管理。外键启用并
+检查，同 run 的关联采用组合外键，设计版本、尝试号、事件序号及调用重试号
+具有唯一约束。不可变规格、产物和追加事件由 SQL 触发器保护，历史不可删除。
+
+`state.py` 集中实现状态转换与条件更新。创建问题、等待状态和事件同事务提交；
+应用答复、设计确认、当前设计切换及事件同事务提交。每个写入连接持有 POSIX
+排他锁直到关闭或进程退出，SQLite 写操作串行；只读查询不持锁、不迁移、不
+初始化模型或 Stata。当前支持 macOS/Linux。
+
+调用和尝试先登记，再在事务外调用外部服务。HTTP 成功和动作解析成功分开
+记录，缺失用量保留 null，实际重试占用预算。缓存与 reasoning 子项不再加入
+供应商 total，摘要明确未知请求数。开始时间不可改写，耗时由调用者的单调
+时钟提供，所有持久化时间使用 UTC。
+
+## 归档与恢复
+
+文件归档先写恢复意图，fsync 临时文件，再使用同目录硬链接原子发布并移除
+临时名；目标存在时失败，因此不覆盖已有文件。随后用短事务登记 artifact 及
+相关状态。结果和核验的索引与 attempt 引用在各自事务中提交，重新提取产生
+新 result ID，清空旧选择和核验引用。文件与 SQLite 不是跨系统原子事务。
+
+恢复核对意图版本、run/设计/调用/尝试来源、文件大小及 hash，仅补登记匹配的
+索引，不凭文件推断统计执行成功。无意图文件、未完成归档、缺失或改动的证据
+和输入保持待处理；不删除原件。未终结调用记为 UNKNOWN，遗留尝试记为
+INTERRUPTED，并暂停 run，保留原服务实例、会话及 task ID。确认旧任务停止后
+才允许重试，不能用新 stdio 服务查询旧实例的 task ID。
+
+## 确认与结果选择
+
+人工答复绑定 request ID 与不可变设计 hash。同答复重复应用无额外副作用，
+不同答复不能改写既有决定。新版本撤销旧的待答设计确认；旧版本已经应用的
+批准也不会切换到新设计。暂停保留待答请求，恢复优先回到 WAITING_HUMAN。
+
+结果选择和后续报告读取共用规则：当前已确认设计、匹配的 experiment/attempt、
+执行已结束且成功、未取消、提取成功、输入和代码 hash 对应、精确结果与设计
+hash 的核验通过，以及无阻断方法问题。计算核验必须来自程序，模型肯定回答
+不能替代确定性核验。方法可用性、具体命令验证和当前识别假设分别表示。
+
+M0 真实探测确认 Stata 18 软取消不充分：取消任务后需回收专用会话并核对 worker
+退出，再建新会话。暂停或失败时在途尝试保留取消标记，迟到输出不能提交为
+成功。阶段 2 将这些状态契约接入实际 AnalysisBackend，当前尚未实现生产执行器。

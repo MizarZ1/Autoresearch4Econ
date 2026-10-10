@@ -1,9 +1,9 @@
-# Local-only assignment files: never stage or upload to Gitea.
+# 题目原件仅留本地，不暂存或上传 Gitea。
 /02_外部候选人/
 /2026-09-Agent-Harness题目.zip
 /2026-09-Agent+Quant题目.zip
 
-# Local sources, data, runtime artifacts, and downloaded papers.
+# 本地来源、数据、运行产物及下载论文。
 /local_reference/
 /examples/demo/data/
 /runs/
@@ -11,7 +11,7 @@
 /output/
 /backups/
 
-# Credentials and machine-specific environments.
+# 凭证与本机专用环境。
 .env
 .env.*
 !.env.example

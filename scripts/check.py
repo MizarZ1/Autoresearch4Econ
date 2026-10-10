@@ -1,4 +1,4 @@
-"""Identical offline quality gate for development and Gitea CI."""
+"""开发机与 Gitea 工作流共用的离线检查入口。"""
 
 import subprocess
 import sys
@@ -15,7 +15,7 @@ def main() -> int:
         ["pytest"],
         ["econ_agent.cli", "--version"],
     ):
-        print(f"Checking: {' '.join(arguments)}", flush=True)
+        print(f"正在检查：{' '.join(arguments)}", flush=True)
         result = subprocess.run([sys.executable, "-m", *arguments], cwd=ROOT, check=False)
         if result.returncode:
             return result.returncode

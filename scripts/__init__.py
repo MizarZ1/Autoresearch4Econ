@@ -1,1 +1,1 @@
-"""Explicit development and verification commands."""
+"""显式开发与验证命令。"""

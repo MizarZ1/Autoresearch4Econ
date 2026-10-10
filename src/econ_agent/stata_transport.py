@@ -1,9 +1,8 @@
-"""Keep native Stata stdout out of the MCP protocol on POSIX hosts.
+"""在 POSIX 上分离原生 Stata 输出和 MCP 协议 stdout。
 
-The pinned server's spawned workers inherit file descriptor 1. Stata 18 can
-leave a prompt without a newline, contaminating the next JSON-RPC message.
-Reserve a separate Python stdout for MCP, and route inherited native stdout to
-stderr before starting the unchanged third-party server.
+固定版本服务的工作进程会继承文件描述符 1。Stata 18 的无换行提示符可能
+污染 JSON-RPC，因此为 Python 协议保留独立 stdout，将原生输出重定向到 stderr，
+随后启动未改写的第三方服务。
 """
 
 import importlib

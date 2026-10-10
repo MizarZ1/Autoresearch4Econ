@@ -1,3 +1,3 @@
-"""Empirical research CLI harness."""
+"""实证经济研究的中文命令行程序。"""
 
 __version__ = "0.1.0"
