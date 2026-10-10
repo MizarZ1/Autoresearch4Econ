@@ -48,6 +48,11 @@ TOOL_DESCRIPTIONS = {
         "执行当前确认设计下的 Stata 主体代码，数据已加载。可运行本机可用命令。"
         "IV 规范化须提供 iv 结构（outcome、endogenous、instruments、controls、"
         "sample_expression），当前仅支持 2SLS、small、常规协方差；"
+        "regression 支持 linear、did、rdd、logit，"
+        "含 outcome、regressors、sample_expression、covariance；"
+        "did 提供 treatment/post/interaction；"
+        "rdd 提供 running/centered/treatment/interaction/cutoff/bandwidth，须 robust；"
+        "summary 提供 variable、sample_expression，结果为 scalars。每次仅一种提取声明。"
         "其他命令只归档原始输出。补充分析须引用当前结果 ID。"
         "method 必须完整复制确认设计中的方法名，例如 ivregress 2sls，不能缩写为 ivregress。"
         "IV 的 variables 按顺序仅列因变量、内生变量、工具、控制，"
@@ -159,6 +164,31 @@ class ResearchLoop:
             ):
                 interpretation = json.loads(store.read_artifact(artifact.artifact_id))
                 self.elapsed_before += float(interpretation.get("processing_seconds", 0))
+        if self.errors >= self.max_errors and checkpoint_time is not None:
+            # 普通 resume 仍受错误上限约束；新的显式接受才开启下一段有界尝试。
+            # 不增加总预算，也不清空成功分析或同一 attempt 的重试次数。
+            acknowledgements: list[str] = []
+            for event in store.events():
+                identifier = event.get("request_id")
+                created = event.get("created_at")
+                payload = event.get("payload")
+                if (
+                    event["type"] == "human_answer_applied"
+                    and isinstance(created, str)
+                    and created > checkpoint_time
+                    and isinstance(payload, dict)
+                    and payload.get("decision") == "accept"
+                    and isinstance(identifier, str)
+                ):
+                    request = store.human_request(identifier)
+                    if (
+                        request.kind == "research_question"
+                        and request.target_design_id == store.load_state().current_design_id
+                    ):
+                        acknowledgements.append(identifier)
+            if acknowledgements:
+                self.errors = 0
+                self._checkpoint(reason="显式答复后恢复有界尝试：" + acknowledgements[-1])
 
     def _remaining(self) -> float:
         return self.store.load_state().budget.max_runtime_seconds - (
@@ -398,7 +428,12 @@ class ResearchLoop:
         self._available(args.method)
         self._refs(args.based_on_result_ids, source_id)
         if self.store.selected_results() and not args.based_on_result_ids:
-            raise ActionRejected("补充分析必须引用促成决策的当前结果 ID")
+            sent = set(self.store.model_call(source_id).context_result_ids)
+            current = [r.result_id for r in self.store.selected_results() if r.result_id in sent]
+            raise ActionRejected(
+                "补充分析必须在 arguments.based_on_result_ids 引用促成决策的当前结果 ID："
+                + "、".join(identifier for identifier in current if identifier)
+            )
         if args.iv and (
             args.method != "ivregress 2sls"
             or args.variables != args.iv.variables()
@@ -418,6 +453,17 @@ class ResearchLoop:
             and not args.iv
         ):
             raise ActionRejected("当前 IV 系数规范化需要显式 iv 提取声明")
+        rule = args.regression or args.summary
+        if rule:
+            method = args.regression.method() if args.regression else "summarize"
+            kind = "scalars" if args.summary else "coefficients"
+            if (
+                args.method != method
+                or args.variables != rule.variables()
+                or args.sample_rule != rule.sample_expression
+                or args.expected_result_type != kind
+            ):
+                raise ActionRejected("提取声明与方法、变量、样本或结果形态不一致")
         previous = None
         if args.retry_attempt_id:
             attempt = self.store.attempt(args.retry_attempt_id)
@@ -478,15 +524,18 @@ class ResearchLoop:
         outcome = await self.backend.run_analysis(
             spec,
             attempt_id=attempt.attempt_id,
-            program=StataProgram(code=args.code, iv=args.iv),
+            program=StataProgram(
+                code=args.code, iv=args.iv, regression=args.regression, summary=args.summary
+            ),
         )
         selected = False
+        selection_error: str | None = None
         if outcome.result.result_id:
             try:
                 self.store.select_result(spec.experiment_id, outcome.result.result_id)
                 selected = True
-            except StateConflict:
-                pass  # 未通过核验保留完整输出，反馈限制而不声称有效。
+            except StateConflict as exc:
+                selection_error = "计算已归档但不能选作当前证据：" + str(exc)
         return {
             "action": action.action,
             "source_model_call_id": source_id,
@@ -497,7 +546,7 @@ class ResearchLoop:
             "outcome": outcome.model_dump(mode="json"),
             "selected": selected,
             "说明": "仅 selected=true 的结果可作为当前数值证据；失败、原始输出或待核验均需披露",
-            "error": outcome.error.message if outcome.error else None,
+            "error": outcome.error.message if outcome.error else selection_error,
         }
 
     async def dispatch(self, action: ResearchAction, source_id: str) -> dict[str, Any]:

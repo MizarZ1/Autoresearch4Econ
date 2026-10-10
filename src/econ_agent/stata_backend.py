@@ -13,12 +13,14 @@ from econ_agent.inputs import check_input, working_copy
 from econ_agent.schemas import (
     Artifact,
     CallStatus,
+    CoefficientResult,
     ExecutionStatus,
     ExperimentResult,
     ExperimentSpec,
     ExtractionStatus,
     MethodCapability,
     RunStatus,
+    ScalarResult,
     ToolCall,
     canonical_json,
     utc_now,
@@ -31,11 +33,20 @@ from econ_agent.stata_contracts import (
     ToolFailure,
 )
 from econ_agent.stata_mcp import StataTransport
+from econ_agent.stata_methods import (
+    SCOPES,
+    extract_regression,
+    extract_summary,
+    extraction_code,
+    method_checks,
+    verified_scopes,
+)
 from econ_agent.stata_results import extract_iv, iv_checks, iv_extraction_code
 from econ_agent.state import ArtifactIntegrityError, RunStore, StateConflict, new_id
 
 METHOD_COMMANDS = (
     "regress",
+    "summarize",
     "xtreg",
     "reghdfe",
     "ivregress",
@@ -376,12 +387,20 @@ class StataBackend:
                 else 'import delimited "$ECON_INPUT", clear'
             )
             input_path = work / f"input.{self.prepared.file_type}"
+            extraction_code_id: str | None = None
+            inline_extraction = ""
+            if program.summary:
+                inline_extraction = extraction_code(program) or ""
+                extraction = self._archive_attempt(
+                    attempt_id, "extract.do", inline_extraction.encode(), kind="code"
+                )
+                extraction_code_id = extraction.artifact_id
+            body_entry = f"do {_quote(self.store.directory / body.relative_path)}\n"
             wrapped = (
                 "* 本次尝试从独立工作副本开始；原件及备份不作为默认输入。\n"
                 "version 18\nclear all\nset more off\nset processors 1\n"
                 f"set seed {self.seed}\nglobal ECON_INPUT {_quote(input_path)}\n"
-                f"global ECON_OUTPUT {_quote(output)}\n{loader}\n"
-                f"do {_quote(self.store.directory / body.relative_path)}\n"
+                f"global ECON_OUTPUT {_quote(output)}\n{loader}\n" + body_entry + inline_extraction
             )
             code = self._archive_attempt(attempt_id, "analysis.do", wrapped.encode(), kind="code")
             arguments = self._archive_attempt(
@@ -416,7 +435,6 @@ class StataBackend:
             stored: dict[str, Any] | None = None
             failure: ToolFailure | None = None
             files: dict[str, str] = {}
-            extraction_code_id: str | None = None
             cancelled_exception = False
             primary_done = False
             try:
@@ -456,11 +474,14 @@ class StataBackend:
                 )
                 if not stored.get("success"):
                     raise _ExecutionFailure("extraction", "主命令已完成，但 MCP 读取返回值失败")
-                if program.iv is not None:
+                extractor = (
+                    iv_extraction_code(program.iv) if program.iv else extraction_code(program)
+                )
+                if extractor is not None and not program.summary:
                     extraction = self._archive_attempt(
                         attempt_id,
                         "extract.do",
-                        iv_extraction_code(program.iv).encode(),
+                        extractor.encode(),
                         kind="code",
                     )
                     extraction_code_id = extraction.artifact_id
@@ -665,7 +686,7 @@ class StataBackend:
         if self.store.read_artifact(payload["body_artifact_id"]).decode() != program.code:
             raise ArtifactIntegrityError("主体代码与真实运行记录中的内容不符")
         spec = self.store.experiment(attempt.experiment_id)
-        if program.iv is None:
+        if program.iv is None and program.regression is None and program.summary is None:
             self.store.mark_extraction(
                 attempt_id,
                 ExtractionStatus.PENDING,
@@ -673,31 +694,59 @@ class StataBackend:
             )
             return self._outcome(attempt_id, attempt.raw_artifact_id, None)
         try:
-            named_id = payload["files"]["coefficients.csv"]
+            name = "scalars.csv" if program.summary else "coefficients.csv"
+            named_id = payload["files"][name]
             sample_id = payload["files"]["sample_check.txt"]
-            normalized = extract_iv(
-                payload["stored"], self.store.read_artifact(named_id).decode(), spec, program.iv
-            )
+            named_csv = self.store.read_artifact(named_id).decode()
+            normalized: CoefficientResult | ScalarResult
+            if program.iv:
+                normalized = extract_iv(payload["stored"], named_csv, spec, program.iv)
+            elif program.regression:
+                normalized = extract_regression(
+                    payload["stored"], named_csv, spec, program.regression
+                )
+            else:
+                assert program.summary is not None
+                snapshot_id = payload["files"]["r_snapshot.json"]
+                scalar_snapshot = json.loads(self.store.read_artifact(snapshot_id))
+                normalized = extract_summary(
+                    {"data": {"r": scalar_snapshot}}, named_csv, spec, program.summary
+                )
             result = self.store.save_result(attempt_id, normalized)
-            checks = iv_checks(
-                payload["stored"],
-                normalized,
-                spec,
-                program,
-                sample_match=self.store.read_artifact(sample_id).strip() == b"1",
-                # 主体及提取代码也是证据，报告读取时须重新核对它们的 hash。
-                evidence_ids=(
-                    attempt.raw_artifact_id,
-                    named_id,
-                    sample_id,
-                    payload["body_artifact_id"],
-                    payload["extraction_code_artifact_id"],
-                ),
+            evidence: tuple[str, ...] = (
+                attempt.raw_artifact_id,
+                named_id,
+                sample_id,
+                payload["body_artifact_id"],
+                payload["extraction_code_artifact_id"],
             )
+            if program.summary:
+                evidence = (*evidence, payload["files"]["r_snapshot.json"])
+            sample_match = self.store.read_artifact(sample_id).strip() == b"1"
+            if program.iv:
+                assert isinstance(normalized, CoefficientResult)
+                checks = iv_checks(
+                    payload["stored"],
+                    normalized,
+                    spec,
+                    program,
+                    sample_match=sample_match,
+                    evidence_ids=evidence,
+                )
+            else:
+                checks = method_checks(
+                    payload["stored"],
+                    normalized,
+                    spec,
+                    program,
+                    sample_match=sample_match,
+                    evidence_ids=evidence,
+                )
             design = self.store.design(spec.design_id)
             approved = (
                 set(spec.variables) <= set(design.content.variables)
                 and spec.method in design.content.methods
+                and spec.sample_rule == design.content.sample_rule
             )
             if not approved:
                 checks = tuple(
@@ -709,7 +758,9 @@ class StataBackend:
                     for c in checks
                 )
             validation = self.store.save_validation(
-                result.artifact_id, checks, rules_version="stata-iv-1"
+                result.artifact_id,
+                checks,
+                rules_version="stata-iv-2" if program.iv else "stata-methods-1",
             )
             return AnalysisOutcome(
                 result=self.store.result(result.artifact_id),
@@ -814,7 +865,7 @@ class StataBackend:
                         )
                     data = {
                         "commands": commands,
-                        "normalization_rules": ["ivregress 2sls, small：常规协方差"],
+                        "normalization_rules": SCOPES,
                         "validation": "unverified",
                     }
                 else:
@@ -936,17 +987,25 @@ class StataBackend:
 
     async def capabilities(self) -> tuple[MethodCapability, ...]:
         data = await self._query("capabilities", {})
+        verified = verified_scopes(self.transport.environment)
         return tuple(
             MethodCapability(
                 method=item["command"],
                 commands=(item["command"],),
                 availability="available" if item["available"] else "unavailable",
-                normalization="supported" if item["command"] == "ivregress" else "unknown",
-                normalization_scope=(
-                    "仅 2SLS、small、常规协方差及完整具名参数；其他口径保留原始输出"
-                    if item["command"] == "ivregress"
+                normalization="supported" if item["command"] in SCOPES else "unknown",
+                normalization_scope=SCOPES.get(item["command"]),
+                validation=(
+                    "validated"
+                    if item["available"] and item["command"] in verified
+                    else "unverified"
+                ),
+                tested_environment=(
+                    "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配"
+                    if item["available"] and item["command"] in verified
                     else None
                 ),
+                validation_scope=verified.get(item["command"]) if item["available"] else None,
                 limitations=("仅查询本机命令，不能据此认定已通过数值测试或识别假设成立",),
             )
             for item in data["commands"]

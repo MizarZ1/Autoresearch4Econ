@@ -1,0 +1,833 @@
+{
+  "source": "真实 Stata 18 MCP 返回 e() 白名单；描述统计另取主 do-file 即时 r() 快照；独立原生 lincom/描述统计参考；自编合成数据",
+  "cases": {
+    "linear": {
+      "program": {
+        "schema_version": 1,
+        "code": "regress ylinear x if included==1",
+        "iv": null,
+        "regression": {
+          "schema_version": 1,
+          "family": "linear",
+          "outcome": "ylinear",
+          "regressors": [
+            "x"
+          ],
+          "sample_expression": "included==1",
+          "covariance": "unadjusted",
+          "did": null,
+          "rdd": null
+        },
+        "summary": null
+      },
+      "stored": {
+        "data": {
+          "e": {
+            "N": 399.0,
+            "df_r": 397.0,
+            "rank": 2.0,
+            "cmdline": "regress ylinear x if included==1",
+            "vce": "ols",
+            "depvar": "ylinear",
+            "cmd": "regress",
+            "_matrices": {
+              "b": {
+                "rows": 1,
+                "cols": 2,
+                "truncated": false,
+                "values": [
+                  [
+                    1.9967755859763634,
+                    1.5131962812239923
+                  ]
+                ]
+              },
+              "V": {
+                "rows": 2,
+                "cols": 2,
+                "truncated": false,
+                "values": [
+                  [
+                    0.0001069571311350532,
+                    -5.361259706017704e-07
+                  ],
+                  [
+                    -5.361259706017704e-07,
+                    0.00021337813629950566
+                  ]
+                ]
+              },
+              "beta": {
+                "rows": 1,
+                "cols": 1,
+                "truncated": false,
+                "values": [
+                  [
+                    0.9947172544304984
+                  ]
+                ]
+              }
+            }
+          },
+          "r": {}
+        }
+      },
+      "named_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\nx,1.9967755859763634,.010342008080399725,0,1.9764436383706085,2.0171075335821183,397,399\n_cons,1.5131962812239923,.01460746851098799,1.8036710676039929e-289,1.484478620001024,1.5419139424469606,397,399\n",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 399,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress ylinear x if included==1",
+        "estimator": "OLS",
+        "variables": [
+          "ylinear",
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "x",
+            "meaning": "x 的 linear 系数",
+            "value": 1.9967755859763634,
+            "standard_error": 0.010342008080399725,
+            "confidence_interval": [
+              1.9764436383706085,
+              2.0171075335821183
+            ],
+            "p_value": 0.0,
+            "degrees_of_freedom": 397.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.5131962812239923,
+            "standard_error": 0.01460746851098799,
+            "confidence_interval": [
+              1.484478620001024,
+              1.5419139424469606
+            ],
+            "p_value": 1.8036710676039929e-289,
+            "degrees_of_freedom": 397.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "native_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\nx,1.9967755859763634,.010342008080399725,0,1.9764436383706085,2.0171075335821183,397,399\n_cons,1.5131962812239923,.01460746851098799,1.8036710676039929e-289,1.484478620001024,1.5419139424469606,397,399\n",
+      "scalar_snapshot": null
+    },
+    "did": {
+      "program": {
+        "schema_version": 1,
+        "code": "regress ydid group post did if included==1, vce(robust)",
+        "iv": null,
+        "regression": {
+          "schema_version": 1,
+          "family": "did",
+          "outcome": "ydid",
+          "regressors": [
+            "group",
+            "post",
+            "did"
+          ],
+          "sample_expression": "included==1",
+          "covariance": "robust",
+          "did": {
+            "schema_version": 1,
+            "treatment": "group",
+            "post": "post",
+            "interaction": "did"
+          },
+          "rdd": null
+        },
+        "summary": null
+      },
+      "stored": {
+        "data": {
+          "e": {
+            "N": 400.0,
+            "df_r": 396.0,
+            "rank": 4.0,
+            "cmdline": "regress ydid group post did if included==1, vce(robust)",
+            "vce": "robust",
+            "depvar": "ydid",
+            "cmd": "regress",
+            "_matrices": {
+              "b": {
+                "rows": 1,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    0.6737206363677899,
+                    0.17657416820525337,
+                    1.801533830165879,
+                    3.0559243607521096
+                  ]
+                ]
+              },
+              "V": {
+                "rows": 4,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    0.0017570390568716256,
+                    0.0008697528421623541,
+                    -0.001757039056871625,
+                    -0.0008697528421623547
+                  ],
+                  [
+                    0.0008697528421623541,
+                    0.0018191723375947184,
+                    -0.0018191723375947171,
+                    -0.0008697528421623553
+                  ],
+                  [
+                    -0.001757039056871625,
+                    -0.0018191723375947171,
+                    0.0034536186817974946,
+                    0.0008697528421623541
+                  ],
+                  [
+                    -0.0008697528421623547,
+                    -0.0008697528421623553,
+                    0.0008697528421623541,
+                    0.0008697528421623556
+                  ]
+                ]
+              },
+              "beta": {
+                "rows": 1,
+                "cols": 3,
+                "truncated": false,
+                "values": [
+                  [
+                    0.30773561431030927,
+                    0.0806538455121803,
+                    0.7126412606339081
+                  ]
+                ]
+              },
+              "V_modelbased": {
+                "rows": 4,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    0.02,
+                    0.01,
+                    -0.02,
+                    -0.01
+                  ],
+                  [
+                    0.01,
+                    0.02,
+                    -0.02,
+                    -0.01
+                  ],
+                  [
+                    -0.02,
+                    -0.02,
+                    0.04,
+                    0.01
+                  ],
+                  [
+                    -0.01,
+                    -0.01,
+                    0.01,
+                    0.01
+                  ]
+                ]
+              }
+            }
+          },
+          "r": {}
+        }
+      },
+      "named_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\ngroup,.67372063636778989,.041917049715737696,4.1550500683070575e-45,.59131286479879319,.7561284079367866,396,400\npost,.17657416820525337,.042651756559310874,.000042480978879466261,.092721983106536676,.26042635330397007,396,400\ndid,1.801533830165879,.058767496814119066,1.3459788354716721e-106,1.6859985411609992,1.9170691191707587,396,400\n_cons,3.0559243607521096,.029491572392165794,5.2948238837354787e-289,2.9979447372484147,3.1139039842558045,396,400\n",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress ydid group post did if included==1, vce(robust)",
+        "estimator": "两组两期重复截面 DiD",
+        "variables": [
+          "ydid",
+          "group",
+          "post",
+          "did"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "HC1 稳健标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "group",
+            "meaning": "group 的 did 系数",
+            "value": 0.6737206363677899,
+            "standard_error": 0.041917049715737696,
+            "confidence_interval": [
+              0.5913128647987932,
+              0.7561284079367866
+            ],
+            "p_value": 4.1550500683070575e-45,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "post",
+            "meaning": "post 的 did 系数",
+            "value": 0.17657416820525337,
+            "standard_error": 0.042651756559310874,
+            "confidence_interval": [
+              0.09272198310653668,
+              0.26042635330397007
+            ],
+            "p_value": 4.248097887946626e-05,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "did",
+            "meaning": "did 的 did 系数",
+            "value": 1.801533830165879,
+            "standard_error": 0.058767496814119066,
+            "confidence_interval": [
+              1.6859985411609992,
+              1.9170691191707587
+            ],
+            "p_value": 1.345978835471672e-106,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 3.0559243607521096,
+            "standard_error": 0.029491572392165794,
+            "confidence_interval": [
+              2.9979447372484147,
+              3.1139039842558045
+            ],
+            "p_value": 5.294823883735479e-289,
+            "degrees_of_freedom": 396.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "native_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\ngroup,.67372063636778989,.041917049715737696,4.1550500683070575e-45,.59131286479879319,.7561284079367866,396,400\npost,.17657416820525337,.042651756559310874,.000042480978879466261,.092721983106536676,.26042635330397007,396,400\ndid,1.801533830165879,.058767496814119066,1.3459788354716721e-106,1.6859985411609992,1.9170691191707587,396,400\n_cons,3.0559243607521096,.029491572392165794,5.2948238837354787e-289,2.9979447372484147,3.1139039842558045,396,400\n",
+      "scalar_snapshot": null
+    },
+    "rdd": {
+      "program": {
+        "schema_version": 1,
+        "code": "regress yrdd treated centered interaction if abs(running-0)<=0.5, vce(robust)",
+        "iv": null,
+        "regression": {
+          "schema_version": 1,
+          "family": "rdd",
+          "outcome": "yrdd",
+          "regressors": [
+            "treated",
+            "centered",
+            "interaction"
+          ],
+          "sample_expression": "abs(running-0)<=0.5",
+          "covariance": "robust",
+          "did": null,
+          "rdd": {
+            "schema_version": 1,
+            "running": "running",
+            "centered": "centered",
+            "treatment": "treated",
+            "interaction": "interaction",
+            "cutoff": 0.0,
+            "bandwidth": 0.5
+          }
+        },
+        "summary": null
+      },
+      "stored": {
+        "data": {
+          "e": {
+            "N": 200.0,
+            "df_r": 196.0,
+            "rank": 4.0,
+            "cmdline": "regress yrdd treated centered interaction if abs(running-0)<=0.5, vce(robust)",
+            "vce": "robust",
+            "depvar": "yrdd",
+            "cmd": "regress",
+            "_matrices": {
+              "b": {
+                "rows": 1,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    3.014877408999674,
+                    0.4698436425272781,
+                    -0.7410455853444472,
+                    1.9716816836178441
+                  ]
+                ]
+              },
+              "V": {
+                "rows": 4,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    0.004497343781194106,
+                    -0.008176099252854159,
+                    0.0030313936733275745,
+                    -0.0028220522446243033
+                  ],
+                  [
+                    -0.008176099252854159,
+                    0.02936698831080565,
+                    -0.029366988310805635,
+                    0.00817609925285416
+                  ],
+                  [
+                    0.0030313936733275745,
+                    -0.029366988310805635,
+                    0.04974948015626592,
+                    -0.00817609925285416
+                  ],
+                  [
+                    -0.0028220522446243033,
+                    0.00817609925285416,
+                    -0.00817609925285416,
+                    0.0028220522446243033
+                  ]
+                ]
+              },
+              "beta": {
+                "rows": 1,
+                "cols": 3,
+                "truncated": false,
+                "values": [
+                  [
+                    0.9735990985715214,
+                    0.08759872889212741,
+                    -0.07723446232996828
+                  ]
+                ]
+              },
+              "V_modelbased": {
+                "rows": 4,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    0.08000600049775787,
+                    -0.12001200099104596,
+                    2.025249318244801e-15,
+                    -0.040003000248879185
+                  ],
+                  [
+                    -0.12001200099104596,
+                    0.4800480039463007,
+                    -0.4800480039463007,
+                    0.12001200099104596
+                  ],
+                  [
+                    2.025249318244801e-15,
+                    -0.4800480039463007,
+                    0.9600960078925933,
+                    -0.12001200099104596
+                  ],
+                  [
+                    -0.040003000248879185,
+                    0.12001200099104596,
+                    -0.12001200099104596,
+                    0.040003000248879185
+                  ]
+                ]
+              }
+            }
+          },
+          "r": {}
+        }
+      },
+      "named_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\ntreated,3.0148774089996739,.067062238116499709,3.3860278561820492e-105,2.8826212047932094,3.1471336132061385,196,200\ncentered,.46984364252727812,.17136799091664012,.0066774378602884338,.13188176356716586,.80780552148739038,196,200\ninteraction,-.7410455853444472,.22304591490602541,.0010647652166970896,-1.1809236284539439,-.30116754223495057,196,200\n_cons,1.9716816836178441,.053122991676150012,1.3506191635232834e-90,1.8669156419152992,2.076447725320389,196,200\n",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 200,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress yrdd treated centered interaction if abs(running-0)<=0.5, vce(robust)",
+        "estimator": "锐断点局部线性 RDD，均匀权重，预先指定带宽",
+        "variables": [
+          "yrdd",
+          "treated",
+          "centered",
+          "interaction",
+          "running"
+        ],
+        "sample_rule": "abs(running-0)<=0.5",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "HC1 稳健标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "treated",
+            "meaning": "treated 的 rdd 系数",
+            "value": 3.014877408999674,
+            "standard_error": 0.06706223811649971,
+            "confidence_interval": [
+              2.8826212047932094,
+              3.1471336132061385
+            ],
+            "p_value": 3.3860278561820492e-105,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "centered",
+            "meaning": "centered 的 rdd 系数",
+            "value": 0.4698436425272781,
+            "standard_error": 0.17136799091664012,
+            "confidence_interval": [
+              0.13188176356716586,
+              0.8078055214873904
+            ],
+            "p_value": 0.006677437860288434,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "interaction",
+            "meaning": "interaction 的 rdd 系数",
+            "value": -0.7410455853444472,
+            "standard_error": 0.2230459149060254,
+            "confidence_interval": [
+              -1.180923628453944,
+              -0.30116754223495057
+            ],
+            "p_value": 0.0010647652166970896,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.9716816836178441,
+            "standard_error": 0.05312299167615001,
+            "confidence_interval": [
+              1.8669156419152992,
+              2.076447725320389
+            ],
+            "p_value": 1.3506191635232834e-90,
+            "degrees_of_freedom": 196.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "native_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\ntreated,3.0148774089996739,.067062238116499709,3.3860278561820492e-105,2.8826212047932094,3.1471336132061385,196,200\ncentered,.46984364252727812,.17136799091664012,.0066774378602884338,.13188176356716586,.80780552148739038,196,200\ninteraction,-.7410455853444472,.22304591490602541,.0010647652166970896,-1.1809236284539439,-.30116754223495057,196,200\n_cons,1.9716816836178441,.053122991676150012,1.3506191635232834e-90,1.8669156419152992,2.076447725320389,196,200\n",
+      "scalar_snapshot": null
+    },
+    "logit": {
+      "program": {
+        "schema_version": 1,
+        "code": "logit binary x if included==1",
+        "iv": null,
+        "regression": {
+          "schema_version": 1,
+          "family": "logit",
+          "outcome": "binary",
+          "regressors": [
+            "x"
+          ],
+          "sample_expression": "included==1",
+          "covariance": "unadjusted",
+          "did": null,
+          "rdd": null
+        },
+        "summary": null
+      },
+      "stored": {
+        "data": {
+          "e": {
+            "rank": 2.0,
+            "N": 400.0,
+            "converged": 1.0,
+            "cmdline": "logit binary x if included==1",
+            "cmd": "logit",
+            "vce": "oim",
+            "depvar": "binary",
+            "_matrices": {
+              "b": {
+                "rows": 1,
+                "cols": 2,
+                "truncated": false,
+                "values": [
+                  [
+                    1.0986122886643883,
+                    -3.010772797054968e-16
+                  ]
+                ]
+              },
+              "V": {
+                "rows": 2,
+                "cols": 2,
+                "truncated": false,
+                "values": [
+                  [
+                    0.01141552511410329,
+                    -1.1286354275118245e-17
+                  ],
+                  [
+                    -1.1286354275118245e-17,
+                    0.015527950310524905
+                  ]
+                ]
+              },
+              "mns": {
+                "rows": 1,
+                "cols": 2,
+                "truncated": false,
+                "values": [
+                  [
+                    0.0,
+                    1.0
+                  ]
+                ]
+              },
+              "rules": {
+                "rows": 1,
+                "cols": 4,
+                "truncated": false,
+                "values": [
+                  [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ]
+                ]
+              },
+              "ilog": {
+                "rows": 1,
+                "cols": 20,
+                "truncated": false,
+                "values": [
+                  [
+                    -277.25887222397813,
+                    -197.57477983160535,
+                    -197.43885030653524,
+                    -197.43867332670314,
+                    -197.43867332643669,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ]
+                ]
+              },
+              "gradient": {
+                "rows": 1,
+                "cols": 2,
+                "truncated": false,
+                "values": [
+                  [
+                    3.260640646374213e-10,
+                    6.8833827526759706e-15
+                  ]
+                ]
+              }
+            }
+          },
+          "r": {}
+        }
+      },
+      "named_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\nx,1.0986122886643883,.10684346079242889,8.4552610096597153e-25,.88920295352761036,1.3080216238011662,,400\n_cons,-3.0107727970549678e-16,.12461119656966987,.99999999999999811,-.24423345734699434,.24423345734699373,,400\n",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "logit binary x if included==1",
+        "estimator": "二元 Logit 对数优势系数",
+        "variables": [
+          "binary",
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "观测信息矩阵",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；正态推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "x",
+            "meaning": "x 的 logit 系数",
+            "value": 1.0986122886643883,
+            "standard_error": 0.10684346079242889,
+            "confidence_interval": [
+              0.8892029535276104,
+              1.3080216238011662
+            ],
+            "p_value": 8.455261009659715e-25,
+            "degrees_of_freedom": null,
+            "missing_reasons": {
+              "degrees_of_freedom": "Logit 使用渐近正态推断，无 t 自由度"
+            }
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": -3.010772797054968e-16,
+            "standard_error": 0.12461119656966987,
+            "confidence_interval": [
+              -0.24423345734699434,
+              0.24423345734699373
+            ],
+            "p_value": 0.9999999999999981,
+            "degrees_of_freedom": null,
+            "missing_reasons": {
+              "degrees_of_freedom": "Logit 使用渐近正态推断，无 t 自由度"
+            }
+          }
+        ]
+      },
+      "native_csv": "parameter,coefficient,standard_error,p_value,lower,upper,df,n\nx,1.0986122886643883,.10684346079242889,8.4552610096597153e-25,.88920295352761036,1.3080216238011664,,400\n_cons,-3.0107727970549678e-16,.12461119656966987,.99999999999999811,-.24423345734699436,.24423345734699375,,400\n",
+      "scalar_snapshot": null
+    },
+    "summary": {
+      "program": {
+        "schema_version": 1,
+        "code": "summarize x if included==1",
+        "iv": null,
+        "regression": null,
+        "summary": {
+          "schema_version": 1,
+          "variable": "x",
+          "sample_expression": "included==1"
+        }
+      },
+      "stored": {
+        "data": {
+          "e": {},
+          "r": {}
+        }
+      },
+      "named_csv": "N,mean,sd,min,max\n400,0,1.4159846508095773,-2,2\n",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "声明条件下单变量非缺失观测",
+        "actual_command": "summarize x if included==1",
+        "estimator": "未加权描述统计",
+        "variables": [
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "不适用",
+          "clusters": [],
+          "explanation": "样本标准差不是均值标准误；当前结果不提供推断"
+        },
+        "kind": "scalars",
+        "values": [
+          {
+            "schema_version": 1,
+            "name": "N",
+            "value": 400.0,
+            "meaning": "非缺失样本量",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "mean",
+            "value": 0.0,
+            "meaning": "均值",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "sd",
+            "value": 1.4159846508095772,
+            "meaning": "样本标准差",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "min",
+            "value": -2.0,
+            "meaning": "最小值",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "max",
+            "value": 2.0,
+            "meaning": "最大值",
+            "missing_reason": null
+          }
+        ]
+      },
+      "native_csv": "N,mean,sd,min,max\n400,0,1.4159846508095773,-2,2\n",
+      "scalar_snapshot": {
+        "N": 400,
+        "mean": 0,
+        "sd": 1.4159846508095772,
+        "min": -2,
+        "max": 2
+      }
+    }
+  },
+  "input_sha256": "80cc9b68b9dc6153eb3b06f6b66abd3fbae7bc66f6cd1d418c7934aa7683a556",
+  "environment": {
+    "mcp_version": "3.3.0",
+    "stata_build": "18.0.185",
+    "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+  }
+}

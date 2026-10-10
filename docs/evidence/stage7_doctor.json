@@ -1,0 +1,368 @@
+{
+  "status": "passed",
+  "environment": {
+    "stata_build": "18.0.185",
+    "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc",
+    "mcp_version": "3.3.0"
+  },
+  "capabilities": [
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "regress",
+      "commands": [
+        "regress"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "含截距、满秩、无权重 OLS；常规或 HC1；两组两期重复截面 DiD；锐断点局部线性 RDD（均匀权重、预定带宽、HC1）",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "OLS 常规 t、两组两期重复截面 DiD HC1 t；锐断点 RDD h=0.5/c=0/均匀权重/HC1 t；证据 docs/evidence/stage7_methods.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "summarize",
+      "commands": [
+        "summarize"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "单变量、无权重的 N、均值、样本标准差、最小与最大值",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "合成单变量未加权 N/mean/sd/min/max；即时 r() 快照与独立参考；证据 docs/evidence/stage7_methods.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "xtreg",
+      "commands": [
+        "xtreg"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "reghdfe",
+      "commands": [
+        "reghdfe"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "ivregress",
+      "commands": [
+        "ivregress"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "仅 2SLS、small、常规协方差及完整具名参数",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "AJR 单工具 2SLS、常规协方差、small；无控制与纬度控制；当前包在新原生会话重跑；证据 docs/evidence/stage7_ajr.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "xtabond",
+      "commands": [
+        "xtabond"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "gmm",
+      "commands": [
+        "gmm"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "didregress",
+      "commands": [
+        "didregress"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "csdid",
+      "commands": [
+        "csdid"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "rdrobust",
+      "commands": [
+        "rdrobust"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "teffects",
+      "commands": [
+        "teffects"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "synth",
+      "commands": [
+        "synth"
+      ],
+      "availability": "unavailable",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "logit",
+      "commands": [
+        "logit"
+      ],
+      "availability": "available",
+      "validation": "validated",
+      "normalization": "supported",
+      "normalization_scope": "二元 Logit、满秩且收敛、观测信息矩阵、正态推断；系数不是边际效应",
+      "tested_environment": "Stata 18.0.185，本机库 hash 与 MCP 3.3.0 精确匹配",
+      "validation_scope": "合成二元 Logit、观测信息矩阵与正态推断、满秩且收敛；证据 docs/evidence/stage7_methods.json",
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "probit",
+      "commands": [
+        "probit"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "poisson",
+      "commands": [
+        "poisson"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "qreg",
+      "commands": [
+        "qreg"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "arima",
+      "commands": [
+        "arima"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "var",
+      "commands": [
+        "var"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "vec",
+      "commands": [
+        "vec"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "analysis_backend": "stata",
+      "method": "stcox",
+      "commands": [
+        "stcox"
+      ],
+      "availability": "available",
+      "validation": "unverified",
+      "normalization": "unknown",
+      "normalization_scope": null,
+      "tested_environment": null,
+      "validation_scope": null,
+      "limitations": [
+        "仅查询本机命令，不能据此认定已通过数值测试或识别假设成立"
+      ]
+    }
+  ],
+  "run_id": "run_a9a0218d5db74161854d2ec953686789",
+  "record_directory": "local_reference/doctor/diagnostic_6971cf371c7c4969bd77125f69789df7",
+  "calls": {
+    "schema_version": 1,
+    "model_calls": 0,
+    "tool_calls": 1,
+    "model_transport_failures": 0,
+    "model_parse_failures": 0,
+    "tool_failures": 0,
+    "model_retries": 0,
+    "tool_retries": 0,
+    "unfinished_model_calls": 0,
+    "unfinished_tool_calls": 0,
+    "known_total_tokens": null,
+    "missing_total_usage_calls": 0
+  },
+  "model_called": false,
+  "reason": "本机方法查询完成；验证范围独立列出"
+}

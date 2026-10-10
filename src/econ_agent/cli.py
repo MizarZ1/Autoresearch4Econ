@@ -86,6 +86,10 @@ def main(argv: list[str] | None = None) -> int:
     doctor_options = doctor.add_argument_group("选项")
     doctor_options.add_argument("-h", "--help", action="help", help="显示帮助并退出")
     doctor_options.add_argument("--backend", default="stata", help="分析后端，首版仅支持 stata")
+    doctor_options.add_argument(
+        "--probe-stata", action="store_true", help="显式连接本机 Stata MCP 并检查方法，不请求模型"
+    )
+    doctor_options.add_argument("--workspace", type=Path, default=Path.cwd())
     doctor_options.add_argument("--json", action="store_true", help="输出脱敏 JSON 配置摘要")
     start = commands.add_parser("start", help="启动研究；没有任务文件时逐项询问")
     start.add_argument("--task", type=Path, help="任务 JSON 文件")
@@ -127,11 +131,19 @@ def main(argv: list[str] | None = None) -> int:
     except ValueError as exc:
         print(f"配置错误：{exc}", file=sys.stderr)
         return 2
+    if args.probe_stata:
+        from econ_agent.diagnostics import probe_stata
+
+        summary["stata_probe"] = asyncio.run(probe_stata(args.workspace))
     if args.json:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     else:
         print(f"econ-agent {__version__} / 后端=stata / Python {platform.python_version()}")
-        print("本次仅检查配置；真实执行情况请以显式探测记录为准。")
+        print(
+            "已显式探测本机 Stata。"
+            if args.probe_stata
+            else "本次仅检查配置；真实执行情况请以显式探测记录为准。"
+        )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
     ready = (
         summary["python"]["supported"]
@@ -139,7 +151,9 @@ def main(argv: list[str] | None = None) -> int:
         and summary["stata"]["installation_present"]
         and summary["mcp"]["installed_version"] is not None
     )
-    return 0 if ready else 1
+    return (
+        0 if ready and (not args.probe_stata or summary["stata_probe"]["status"] == "passed") else 1
+    )
 
 
 def research_command(parser: ChineseArgumentParser, args: argparse.Namespace) -> int:

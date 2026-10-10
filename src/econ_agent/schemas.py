@@ -613,6 +613,7 @@ class DesignArguments(Contract):
 
 
 Variable = Annotated[str, Field(pattern=r"^[A-Za-z_][A-Za-z0-9_]{0,31}$")]
+NumericSample = Annotated[str, Field(min_length=1, pattern=r"^[A-Za-z0-9_ .()=!<>|&+*/-]+$")]
 
 
 class IVSpecification(Contract):
@@ -638,6 +639,89 @@ class IVSpecification(Contract):
         return (self.outcome, self.endogenous, *self.instruments, *self.controls)
 
 
+class DiDStructure(Contract):
+    """两个时期、两个组的重复截面；不覆盖面板聚类或分期处理。"""
+
+    treatment: Variable
+    post: Variable
+    interaction: Variable
+
+
+class RDDStructure(Contract):
+    """预先指定带宽的锐断点局部线性模型，采用均匀权重。"""
+
+    running: Variable
+    centered: Variable
+    treatment: Variable
+    interaction: Variable
+    cutoff: float = 0
+    bandwidth: float = Field(gt=0)
+
+
+class RegressionSpecification(Contract):
+    """只提取具名、无权重、含截距且满秩的明确规格。"""
+
+    family: Literal["linear", "did", "rdd", "logit"]
+    outcome: Variable
+    regressors: tuple[Variable, ...] = Field(min_length=1)
+    sample_expression: NumericSample
+    covariance: Literal["unadjusted", "robust"] = "unadjusted"
+    did: DiDStructure | None = None
+    rdd: RDDStructure | None = None
+
+    @model_validator(mode="after")
+    def structure_matches(self) -> Self:
+        if len(set(self.variables())) != len(self.variables()):
+            raise ValueError("估计变量不能重复")
+        if (self.family == "did") != (self.did is not None) or (self.family == "rdd") != (
+            self.rdd is not None
+        ):
+            raise ValueError("DiD 或 RDD 必须提供且只提供对应结构")
+        if self.did and self.regressors != (
+            self.did.treatment,
+            self.did.post,
+            self.did.interaction,
+        ):
+            raise ValueError("当前 DiD 仅支持组别、时期和交互项的两组两期重复截面")
+        if self.rdd and (
+            self.regressors != (self.rdd.treatment, self.rdd.centered, self.rdd.interaction)
+            or self.covariance != "robust"
+        ):
+            raise ValueError("当前 RDD 要求处理、中心化运行变量、交互项及稳健协方差")
+        if self.family == "logit" and self.covariance != "unadjusted":
+            raise ValueError("当前 Logit 仅支持观测信息矩阵及正态推断")
+        return self
+
+    def method(self) -> str:
+        return "logit" if self.family == "logit" else "regress"
+
+    def command(self) -> str:
+        option = ", vce(robust)" if self.covariance == "robust" else ""
+        return (
+            f"{self.method()} {self.outcome} {' '.join(self.regressors)} "
+            f"if {self.sample_expression}{option}"
+        )
+
+    def variables(self) -> tuple[str, ...]:
+        variables = (self.outcome, *self.regressors)
+        if self.rdd and self.rdd.running not in variables:
+            variables = (*variables, self.rdd.running)
+        return variables
+
+
+class SummarySpecification(Contract):
+    """单个变量的未加权描述统计，不猜测置信区间或因果效应。"""
+
+    variable: Variable
+    sample_expression: NumericSample
+
+    def command(self) -> str:
+        return f"summarize {self.variable} if {self.sample_expression}"
+
+    def variables(self) -> tuple[str, ...]:
+        return (self.variable,)
+
+
 class AnalysisArguments(Contract):
     design_id: Identifier
     design_version: int = Field(ge=1)
@@ -650,8 +734,16 @@ class AnalysisArguments(Contract):
     sample_rule: Nonempty
     code: Nonempty
     iv: IVSpecification | None = None
+    regression: RegressionSpecification | None = None
+    summary: SummarySpecification | None = None
     retry_attempt_id: Identifier | None = None
     expected_result_type: Literal["coefficients", "scalars", "matrices", "effect_path", "table"]
+
+    @model_validator(mode="after")
+    def one_extraction(self) -> Self:
+        if sum(v is not None for v in (self.iv, self.regression, self.summary)) > 1:
+            raise ValueError("一次分析只能声明一种提取规则")
+        return self
 
 
 class ReviewArguments(Contract):

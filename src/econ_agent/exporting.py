@@ -443,7 +443,8 @@ def export_run(store: RunStore, output_root: Path) -> Path:
 
 1. 将整个包移动到任意目录。打开一个全新的 Stata 会话，切换到本包根目录。
 2. 执行 `do reproduce.do`，或 `do reproduce.do "本包绝对路径"`。入口只重跑当前已选用结果。
-3. 检查 `rerun_output/<attempt_id>/coefficients.csv`、`sample_check.txt` 及日志。
+3. 检查 `rerun_output/<attempt_id>/coefficients.csv`（系数）或 `scalars.csv`（描述统计）、
+   `sample_check.txt` 及日志。
    以 `tables.json`、`evidence.json` 和原始 CSV 核对数值。
    AJR 工程验收容差：绝对容差 1e-7、相对容差 1e-6，按二者较大值核对，样本量和自由度一致；
    其他方法不借用此验收结论。

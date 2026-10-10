@@ -100,5 +100,7 @@ Git commit 与 dirty 标记仍保留在环境记录中。
 远端 CI 不计为通过，草稿 PR 不自动合并。其他方法非系数验证与完整首版交付
 留待阶段 7。
 
-[阶段 6 PR #7](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/7) 为开放草稿，未合并。首次创建时两个远端
-状态 pending、独立审阅为零；授权跳过 runner，不等同于 CI 通过。
+[阶段 6 PR #7](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/7)
+首次交付为开放草稿，两个远端状态 pending、独立审阅为零；授权跳过 runner，
+不等同于 CI 通过。阶段七开始时实测此 PR 已合并，合并提交 80c343b；
+本节数值和调用记录仍保留阶段六历史口径。

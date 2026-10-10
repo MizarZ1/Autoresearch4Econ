@@ -29,7 +29,10 @@ def invoke(directory: Path, name: str, *arguments: str) -> str:
         timeout=300,
         check=False,
     )
-    (directory / (name + ".log")).write_text(result.stdout + result.stderr)
+    log = directory / (name + ".log")
+    if log.exists():
+        log = directory / (new_id(name) + ".log")
+    log.write_text(result.stdout + result.stderr)
     assert result.returncode == 0, "请核对本地 CLI 日志：" + name
     return result.stdout
 
@@ -148,14 +151,20 @@ def main() -> int:
     parser.add_argument(
         "--core-python", type=Path, help="显式核对没有 MCP/Stata 依赖的 Python 环境"
     )
-    args = parser.parse_args()
-    directory = args.directory or ROOT / "local_reference/stage6" / datetime.now(UTC).strftime(
-        "%Y%m%dT%H%M%S%f"
+    parser.add_argument(
+        "--evidence-prefix",
+        choices=("stage6", "stage7_ajr"),
+        default="stage6",
+        help="首版交付时单独保存 AJR 回归证据，不覆盖阶段六历史",
     )
+    args = parser.parse_args()
+    directory = args.directory or ROOT / "local_reference" / args.evidence_prefix / datetime.now(
+        UTC
+    ).strftime("%Y%m%dT%H%M%S%f")
     directory = directory.resolve()
     directory.mkdir(parents=True, exist_ok=args.directory is not None)
     if not args.run_id:
-        task = {
+        task: dict[str, Any] = {
             "data_path": str(ROOT / "examples/demo/data/maketable4.dta"),
             "research_goal": (
                 "以 AJR 国家截面数据研究 avexpr 与 logpgp95 的关系，用 logem4 作工具。"
@@ -178,6 +187,12 @@ def main() -> int:
                 "max_runtime_seconds": 900,
             },
         }
+        if args.evidence_prefix == "stage7_ajr":
+            task["research_goal"] += (
+                "两个新设计下的真实结果均选用后，调用一次review_results，"
+                "将这两个结果ID都交给两项并发审阅，依据实际意见结束研究；"
+                "不要增加新研究规格，所有尚未执行诊断明确为未执行。"
+            )
         task_file = directory / "task.json"
         task_file.write_text(json.dumps(task, ensure_ascii=False))
         output = invoke(directory, "start", "start", "--task", str(task_file), "--no-input")
@@ -190,7 +205,8 @@ def main() -> int:
         authorization = json.loads((ROOT / "local_reference/stage5/authorization.json").read_text())
         authorization.update(
             {
-                "stage6_reuse": "沿用用户真实授权自行选择样本；此案例确认由开发脚本完成",
+                "authorization_reuse": args.evidence_prefix
+                + "：沿用用户真实授权自行选择样本；此案例确认由开发脚本完成",
                 "initial_and_revised_accept_are_scripted": True,
                 "supplementary_analysis": "预先计划的lat_abst控制，检验工程闭环，不以显著性择优",
             }
@@ -214,9 +230,21 @@ def main() -> int:
             "三者精确复制baseco==1，禁止追加任何!missing()；缺失由Stata默认排除。"
             "确认后先只跑基准再询问样本修改。"
         )
-        invoke(
-            directory, "baseline_recovery", "resume", run_id, "--no-input", "--feedback", correction
-        )
+        recovery = status(run_id, directory, "before_baseline_recovery")
+        if recovery["pending_requests"]:
+            answer(
+                directory, run_id, recovery["pending_requests"][0], correction, "baseline_recovery"
+            )
+        else:
+            invoke(
+                directory,
+                "baseline_recovery",
+                "resume",
+                run_id,
+                "--no-input",
+                "--feedback",
+                correction,
+            )
         corrected = status(run_id, directory, "baseline_corrected")
         answer(
             directory,
@@ -293,6 +321,85 @@ def main() -> int:
             ).hexdigest()
             == results[0].input_sha256,
         }
+        if args.evidence_prefix == "stage7_ajr":
+            groups: dict[str, list[Any]] = {}
+            for call in store.model_calls():
+                if call.parent_tool_call_id:
+                    groups.setdefault(call.parent_tool_call_id, []).append(call)
+            record["review_batches"] = []
+            for parent, group in groups.items():
+                assert len(group) == 2 and all(
+                    c.status == "SUCCEEDED" and c.parse_status == "VALID" for c in group
+                )
+                starts = [datetime.fromisoformat(c.started_at) for c in group]
+                ends = [datetime.fromisoformat(c.ended_at) for c in group]
+                overlap = (min(ends) - max(starts)).total_seconds()
+                assert overlap > 0
+                record["review_batches"].append(
+                    {
+                        "parent_tool_call_id": parent,
+                        "model_call_ids": [c.model_call_id for c in group],
+                        "context_result_ids": group[0].context_result_ids,
+                        "overlap_seconds": overlap,
+                        "both_valid": True,
+                    }
+                )
+            assert record["review_batches"]
+            reference_path = ROOT / "examples/demo/reference/independent_stata18.json"
+            reference = json.loads(reference_path.read_text())
+            historical_candidates = []
+            for experiment in store.experiments():
+                for attempt in store.attempts(experiment.experiment_id):
+                    if attempt.result_artifact_id:
+                        result = store.result(attempt.result_artifact_id)
+                        if result.normalized and result.normalized.sample_size == 64:
+                            historical_candidates.append(result)
+            assert historical_candidates
+            historical = historical_candidates[0]
+            assert isinstance(historical.normalized, CoefficientResult)
+            assert historical.input_sha256 == reference["data_sha256"]
+            for estimate in historical.normalized.estimates:
+                expected = next(
+                    row
+                    for row in reference["estimates"]
+                    if row["specification"] == "baseline"
+                    and row["estimator"] == "ivregress"
+                    and row["parameter"] == estimate.name
+                )
+                assert estimate.value is not None and estimate.standard_error is not None
+                assert math.isclose(
+                    estimate.value, float(expected["coefficient"]), abs_tol=1e-7, rel_tol=1e-6
+                )
+                assert math.isclose(
+                    estimate.standard_error,
+                    float(expected["standard_error"]),
+                    abs_tol=1e-7,
+                    rel_tol=1e-6,
+                )
+                assert estimate.degrees_of_freedom == float(expected["df_r"])
+            record["baseline_reference"] = {
+                "result_id": historical.result_id,
+                "sample_size": 64,
+                "matched": True,
+                "reference_sha256": hashlib.sha256(reference_path.read_bytes()).hexdigest(),
+            }
+            record["explicit_recovery_request_ids"] = [
+                json.loads(store.read_artifact(a.artifact_id))["reason"].split("：", 1)[1]
+                for a in store.artifacts(kind="tool_response")
+                if a.relative_path.startswith("calls/harness/")
+                and str(
+                    json.loads(store.read_artifact(a.artifact_id)).get("reason", "")
+                ).startswith("显式答复后恢复有界尝试：")
+            ]
+            reextraction = next(
+                a
+                for a in store.artifacts(kind="tool_response")
+                if a.relative_path == "calls/stage7/iv_equivalent_command_reextraction.json"
+            )
+            record["iv_equivalent_command_reextraction"] = {
+                "artifact_id": reextraction.artifact_id,
+                **json.loads(store.read_artifact(reextraction.artifact_id)),
+            }
     # 错误模型配置及不存在的 Stata 路径不能影响已有记录的离线导出。
     environment = dict(os.environ, ECON_AGENT_MODEL_URL="bad-url", STATA_PATH="/不存在/stata")
     environment.pop("DEEPSEEK_API_KEY", None)
@@ -345,9 +452,16 @@ assert not any(name == "mcp" or name.startswith("mcp.") or name == "psutil" for 
     record["code_sha256_scope"] = "最终导出与复现核对时的工作树；不倒填此前模型调用的代码版本"
     payload = json.dumps(record, ensure_ascii=False, indent=2)
     (directory / "summary.json").write_text(payload)
-    (ROOT / "docs/evidence/stage6_report.json").write_text(payload)
-    (ROOT / "local_reference/stage6/latest.txt").write_text(str(directory))
-    print("阶段六真实验收通过：人工授权样本修改、基准与纬度补充、论文证据及迁移后 Stata 复现一致。")
+    (
+        ROOT
+        / "docs/evidence"
+        / ("stage6_report.json" if args.evidence_prefix == "stage6" else "stage7_ajr.json")
+    ).write_text(payload)
+    (ROOT / "local_reference" / args.evidence_prefix / "latest.txt").write_text(str(directory))
+    print(
+        args.evidence_prefix
+        + " 真实验收通过：授权样本修改、基准与纬度补充、论文证据及迁移后 Stata 复现一致。"
+    )
     return 0
 
 
