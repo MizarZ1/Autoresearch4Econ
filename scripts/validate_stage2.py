@@ -331,6 +331,40 @@ async def main() -> int:
         assert len(recovered.selected_results()) == 2
         record["recovered_selected_results"] = 2
     record.update(status="passed", finished_at=datetime.now(UTC).isoformat())
+    # 候选交付只发布核验摘要；数据预览、数据库及原始日志继续留在本地。
+    public = {
+        k: record[k]
+        for k in (
+            "schema_version",
+            "started_at",
+            "finished_at",
+            "status",
+            "run_id",
+            "fixed_developer_scenario",
+            "code_sha256",
+            "environment",
+            "original_unchanged",
+        )
+    }
+    public["cases"] = {
+        name: {
+            "normalized": record["cases"][name]["outcome"]["result"]["normalized"],
+            "reference_validation": record["cases"][name]["reference_validation"],
+        }
+        for name in ("baseline", "latitude")
+    }
+    public["lifecycle_passed"] = [
+        "syntax_failure",
+        "real_timeout",
+        "real_cancel",
+        "fresh_after_cancel",
+    ]
+    public["environment"] = {
+        k: record["environment"][k] for k in ("mcp_version", "stata_build", "stata_library_sha256")
+    }
+    (ROOT / "docs/evidence/demo_v01_iv.json").write_text(
+        json.dumps(public, ensure_ascii=False, indent=2) + "\n"
+    )
     (evidence / "validation.json").write_text(
         json.dumps(record, ensure_ascii=False, indent=2) + "\n"
     )

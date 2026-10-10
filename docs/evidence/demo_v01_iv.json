@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-10T14:14:55.562388+00:00",
+  "finished_at": "2026-10-10T14:15:45.783155+00:00",
+  "status": "passed",
+  "run_id": "run_stage2_20261010T141455562195",
+  "fixed_developer_scenario": true,
+  "code_sha256": {
+    "scripts/validate_stage2.py": "a8f1aa4340ebbe0c18725dfa3b32d62f8924bd1e804dba532ef524e8d31bdfba",
+    "src/econ_agent/__init__.py": "49afb54ffbfe3bc6cacd2166162717eec3e621ae6d26a7701edd8a5f4730a941",
+    "src/econ_agent/cli.py": "34dd152f4987a1276b5e804f44d837e37d6618cca4c0b70538df183ea17ff760",
+    "src/econ_agent/config.py": "ca5a7b1d604a52c218a39ca7f210f5e0efcee941f2423dbed390ca1b7a7e91b3",
+    "src/econ_agent/diagnostics.py": "89dc0931c72f824bdcd9b9260fa7edf9cea1e6e4d5f465a1ef537e14d5c84adb",
+    "src/econ_agent/exporting.py": "c26103e1ea4d309bc7fe14f960808628bd3ce2268f658da4d3e9c333075ea689",
+    "src/econ_agent/harness.py": "581e31f4e11b6be7c1732bd3724c05d8cb177323de196f78a3f422f82749a20e",
+    "src/econ_agent/inference.py": "1185ebb50536ba697bcbf2661ec792261b60658fed95deec9ed663c012a24fed",
+    "src/econ_agent/inputs.py": "6167a743025074596920387d2b653347ef5f227419838569eeac47831bb9c338",
+    "src/econ_agent/interaction.py": "f32d6047621cb5c3c2650d0a5ca558e88090656e18250e5715f529c9df2f6391",
+    "src/econ_agent/migrations.py": "c8eadeaec02044e20f17b2cda431f68f81bf303e009a2e703bc746632da936c5",
+    "src/econ_agent/model_client.py": "faac344d8c5148322f5a1ba21a465379addb818a330d8ca6412fdc83223e449f",
+    "src/econ_agent/paper_contracts.py": "1e720117d2983dd70bb8a19ac672ce186985e6812e57e75940655e45969f2ad0",
+    "src/econ_agent/ports.py": "65dbd15255f57df2345eb587365d1b27307f935d0fe552695d6ad91ce11f15d9",
+    "src/econ_agent/processes.py": "fb157e4e02856069faae498c55402ceb7c9bd5d018ce2d3571b505873a259de6",
+    "src/econ_agent/recovery.py": "16913a1920706c5eafcbe0cec879427b6060fa7965ba281efd6eda25510b5dbd",
+    "src/econ_agent/reporting.py": "2f08d3a2329ab842d068c06b1967021510b34272c178e5727b1319f07edec816",
+    "src/econ_agent/review.py": "0e5e3e40542619197764ee983bb0258c546add3c7851700c680aac467c4ce399",
+    "src/econ_agent/schemas.py": "b18fd97a5fa5a7680ceae6c7ff34878e6afe0270a825500ec6de811f5ac02dd4",
+    "src/econ_agent/session.py": "30b3d1208124e3add964192612a15ad56cffa484387874aa506a913a7a390275",
+    "src/econ_agent/stata_backend.py": "931e99bb4da0a54756139455118833e8abc701cd7d98373e7db941a66a5150a9",
+    "src/econ_agent/stata_contracts.py": "2b3a010f814df141422bb9761388389e13b5e1088f3cc658414ac009e5b6a2f6",
+    "src/econ_agent/stata_mcp.py": "b4dd9d9f19ccc2a9dd544061f1c25f5eb293a9058ab22b69d1f204d270c95485",
+    "src/econ_agent/stata_methods.py": "cf4472e795a2e16fd613781498cd620f3cee74005f1c2d0bd73e4a355e71eaeb",
+    "src/econ_agent/stata_results.py": "8a3367e5a51435f66fb43aa568680ba25dcf2c9508c18694eb91de42edd6456b",
+    "src/econ_agent/stata_transport.py": "a78e5a47015b3cf3f97c6ac611f563f3611112e9c4e8c71de5b3986486779876",
+    "src/econ_agent/state.py": "e3b3d6832db55be5a0fd7788e09581c92ce267956ce6c63af94cad69accab65f"
+  },
+  "environment": {
+    "mcp_version": "3.3.0",
+    "stata_build": "18.0.185",
+    "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
+  },
+  "original_unchanged": true,
+  "cases": {
+    "baseline": {
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 64,
+        "sample_note": "Stata 实际估计样本；已与声明条件逐行比较",
+        "actual_command": "ivregress 2sls logpgp95  (avexpr=logem4) if baseco==1, small",
+        "estimator": "2SLS，有限样本 t 推断",
+        "variables": [
+          "logpgp95",
+          "avexpr",
+          "logem4"
+        ],
+        "sample_rule": "baseco==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "实际 e(vce)=unadjusted，small 修正，95% 区间及双侧 p 值由 Stata 计算"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "avexpr",
+            "meaning": "avexpr 的 2SLS 系数",
+            "value": 0.9442793851547995,
+            "standard_error": 0.1565254573295791,
+            "confidence_interval": [
+              0.6313894542623475,
+              1.2571693160472515
+            ],
+            "p_value": 9.798644711494116e-08,
+            "degrees_of_freedom": 62.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.9096665405467377,
+            "standard_error": 1.0267272828674525,
+            "confidence_interval": [
+              -0.14273205366637143,
+              3.962065134759847
+            ],
+            "p_value": 0.06763719612573942,
+            "degrees_of_freedom": 62.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "reference_validation": "validation_6453b86afad045d88e44011fd010f458"
+    },
+    "latitude": {
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 64,
+        "sample_note": "Stata 实际估计样本；已与声明条件逐行比较",
+        "actual_command": "ivregress 2sls logpgp95 lat_abst (avexpr=logem4) if baseco==1, small",
+        "estimator": "2SLS，有限样本 t 推断",
+        "variables": [
+          "logpgp95",
+          "avexpr",
+          "logem4",
+          "lat_abst"
+        ],
+        "sample_rule": "baseco==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "实际 e(vce)=unadjusted，small 修正，95% 区间及双侧 p 值由 Stata 计算"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "avexpr",
+            "meaning": "avexpr 的 2SLS 系数",
+            "value": 0.9957040323624361,
+            "standard_error": 0.22168160035208193,
+            "confidence_interval": [
+              0.5524242759389908,
+              1.4389837887858814
+            ],
+            "p_value": 3.207974019833572e-05,
+            "degrees_of_freedom": 61.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "lat_abst",
+            "meaning": "lat_abst 的 2SLS 系数",
+            "value": -0.6472071456214712,
+            "standard_error": 1.3351409306445932,
+            "confidence_interval": [
+              -3.316986439830491,
+              2.0225721485875487
+            ],
+            "p_value": 0.629591175614749,
+            "degrees_of_freedom": 61.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.6918138372968317,
+            "standard_error": 1.2929851024696464,
+            "confidence_interval": [
+              -0.8936696686485703,
+              4.277297343242234
+            ],
+            "p_value": 0.19562748204495675,
+            "degrees_of_freedom": 61.0,
+            "missing_reasons": {}
+          }
+        ]
+      },
+      "reference_validation": "validation_ee5bd83fd33344fca62cdd20000ebaae"
+    }
+  },
+  "lifecycle_passed": [
+    "syntax_failure",
+    "real_timeout",
+    "real_cancel",
+    "fresh_after_cancel"
+  ]
+}

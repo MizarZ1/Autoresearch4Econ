@@ -22,6 +22,11 @@ from econ_agent.schemas import (
 from econ_agent.state import RunStore, StateConflict, new_id
 
 FACT_PATTERN = re.compile(r"\{\{fact:(F\d+)\}\}")
+CHINESE_EMPIRICAL_PATTERN = re.compile(
+    r"(?:样本量|系数(?:估计)?|标准误|自由度|双侧\s*p\s*值)\s*(?:为|是|等于)\s*"
+    r"[负零〇一二三四五六七八九十百千万亿两点]+"
+    r"|[零〇一二三四五六七八九十百千万亿两]+\s*(?:个国家|个观测|条记录|名参与者)"
+)
 
 
 def json_bytes(value: Any) -> bytes:
@@ -256,6 +261,8 @@ def validate_draft(draft: PaperDraft, context: dict[str, Any]) -> None:
             raise ValueError("结论引用的结果与事实不匹配")
         text_items.append(FACT_PATTERN.sub("", claim.text))
     for text in text_items:
+        if CHINESE_EMPIRICAL_PATTERN.search(text):
+            raise ValueError("中文经验数字必须使用受核验的事实占位符")
         for term in sorted(allowed_terms, key=len, reverse=True):
             text = text.replace(term, "")
         # 来源明确的资料年份属于元数据；仅允许带“年”的形式，不豁免经验系数。
@@ -363,10 +370,21 @@ def elapsed_seconds(store: RunStore) -> float:
         if a.relative_path.startswith("calls/harness/")
     ]
     checkpoint = json.loads(store.read_artifact(checkpoints[-1].artifact_id)) if checkpoints else {}
+    checkpoint_time = checkpoints[-1].created_at if checkpoints else None
+    feedback_seconds = 0.0
+    for artifact in store.artifacts(kind="tool_response"):
+        if (
+            artifact.relative_path.startswith("calls/human/")
+            and artifact.relative_path.endswith("/interpretation.json")
+            and (checkpoint_time is None or artifact.created_at > checkpoint_time)
+        ):
+            record = json.loads(store.read_artifact(artifact.artifact_id))
+            feedback_seconds += float(record.get("processing_seconds", 0))
     return (
         float(checkpoint.get("elapsed_seconds", 0))
         + writing_seconds(store)
         - float(checkpoint.get("writing_seconds_accounted", 0))
+        + feedback_seconds
     )
 
 

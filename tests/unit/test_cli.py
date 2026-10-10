@@ -77,7 +77,7 @@ def test_installed_module_entry_point() -> None:
         check=False,
     )
     assert result.returncode == 0
-    assert result.stdout.strip() == "0.1.0"
+    assert result.stdout.strip() == "0.1.0rc1"
 
 
 def test_help_and_parameter_errors_use_chinese(capsys: pytest.CaptureFixture[str]) -> None:

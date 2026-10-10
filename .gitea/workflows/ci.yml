@@ -21,3 +21,8 @@ jobs:
         run: uv run --locked --extra stata --group dev python scripts/check.py
       - name: 验证安装后的命令行入口
         run: uv run --locked --extra stata --group dev econ-agent --version
+      - name: 白名单构建与仓库外安装检查
+        run: |
+          uv run --locked --extra stata --group dev python scripts/build_release.py
+          uv run --locked --extra stata --group dev python scripts/validate_install.py --packages output/releases/demoV0.1-test
+          uv run --locked --extra stata --group dev python scripts/build_release.py --finalize

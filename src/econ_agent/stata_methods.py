@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 from typing import Any
 
+from econ_agent.inference import check_inference
 from econ_agent.schemas import (
     CoefficientResult,
     Estimate,
@@ -164,26 +165,7 @@ def extract_regression(
             not normal and (df != e["df_r"] or df != n - size)
         ):
             raise ValueError("推断自由度与实际估计不符")
-        if normal and (
-            not math.isclose(
-                values["p_value"],
-                math.erfc(abs(values["coefficient"] / values["standard_error"]) / math.sqrt(2)),
-                abs_tol=1e-12,
-            )
-            or not math.isclose(
-                values["lower"],
-                values["coefficient"] - 1.959963984540054 * values["standard_error"],
-                rel_tol=1e-10,
-                abs_tol=1e-12,
-            )
-            or not math.isclose(
-                values["upper"],
-                values["coefficient"] + 1.959963984540054 * values["standard_error"],
-                rel_tol=1e-10,
-                abs_tol=1e-12,
-            )
-        ):
-            raise ValueError("Logit 推断与正态口径不一致")
+        check_inference(values, df)
         estimates.append(
             Estimate(
                 name=row["parameter"],
@@ -264,7 +246,12 @@ restore
 
 
 def extract_summary(
-    raw: dict[str, Any], named_csv: str, spec: ExperimentSpec, rule: SummarySpecification
+    raw: dict[str, Any],
+    named_csv: str,
+    spec: ExperimentSpec,
+    rule: SummarySpecification,
+    *,
+    actual_command: str | None = None,
 ) -> ScalarResult:
     r = raw["data"]["r"]
     rows = list(csv.DictReader(io.StringIO(named_csv)))
@@ -290,7 +277,7 @@ def extract_summary(
     return ScalarResult(
         sample_size=int(n),
         sample_note="声明条件下单变量非缺失观测",
-        actual_command=rule.command(),
+        actual_command=actual_command if actual_command is not None else rule.command(),
         estimator="未加权描述统计",
         variables=spec.variables,
         sample_rule=rule.sample_expression,

@@ -8,51 +8,48 @@
   "mapping_sha256": {
     "schemas.py": "b18fd97a5fa5a7680ceae6c7ff34878e6afe0270a825500ec6de811f5ac02dd4",
     "stata_contracts.py": "2b3a010f814df141422bb9761388389e13b5e1088f3cc658414ac009e5b6a2f6",
-    "stata_results.py": "bf27f9d681ec0aeccf0d0067bdf07ef0ab75f80eae33caa45d0e449355491b99",
-    "stata_methods.py": "ae65f7834a886876bf5eed75e2595a4a3d77772465c88e9aafcc076e3cf15d41",
-    "stata_backend.py": "217782e8846a5ec56f762507082be05ee2475d889b541e40d5b94e49807b7879",
-    "harness.py": "62c9aedf1f0b53141f5d47721f42496b56b0dab96bdd01b1309f94f378316199"
+    "stata_results.py": "8a3367e5a51435f66fb43aa568680ba25dcf2c9508c18694eb91de42edd6456b",
+    "stata_methods.py": "cf4472e795a2e16fd613781498cd620f3cee74005f1c2d0bd73e4a355e71eaeb",
+    "stata_backend.py": "931e99bb4da0a54756139455118833e8abc701cd7d98373e7db941a66a5150a9",
+    "harness.py": "581e31f4e11b6be7c1732bd3724c05d8cb177323de196f78a3f422f82749a20e",
+    "inference.py": "1185ebb50536ba697bcbf2661ec792261b60658fed95deec9ed663c012a24fed"
   },
   "validated_scopes": {
-    "regress": "OLS 常规 t、两组两期重复截面 DiD HC1 t；锐断点 RDD h=0.5/c=0/均匀权重/HC1 t；证据 docs/evidence/stage7_methods.json",
-    "logit": "合成二元 Logit、观测信息矩阵与正态推断、满秩且收敛；证据 docs/evidence/stage7_methods.json",
-    "summarize": "合成单变量未加权 N/mean/sd/min/max；即时 r() 快照与独立参考；证据 docs/evidence/stage7_methods.json",
-    "ivregress": "AJR 单工具 2SLS、常规协方差、small；无控制与纬度控制；当前包在新原生会话重跑；证据 docs/evidence/stage7_ajr.json"
+    "regress": "OLS 常规 t、两组两期重复截面 DiD HC1 t；锐断点 RDD h=0.5/c=0/均匀权重/HC1 t；证据 docs/evidence/demo_v01_methods.json",
+    "logit": "合成二元 Logit、观测信息矩阵与正态推断、满秩且收敛；证据 docs/evidence/demo_v01_methods.json",
+    "summarize": "合成单变量未加权 N/mean/sd/min/max；即时 r() 快照与独立参考；证据 docs/evidence/demo_v01_methods.json",
+    "ivregress": "AJR 单工具 2SLS、常规协方差、small；无控制与纬度控制；N=64；独立参考、重新提取及生命周期检查；证据 docs/evidence/demo_v01_iv.json"
   },
   "evidence_ids": {
     "linear": {
-      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
-      "attempt_id": "attempt_97b7b1a1f7e340e88929db2546a9743c",
-      "result_id": "result_e1d138fc23a4405e9db2b27870828235",
-      "validation_artifact_id": "validation_f59f7014416a480ea87045a6eac29437"
+      "run_id": "run_eff36995976d4ef2bf9153e5e3f6dca8",
+      "attempt_id": "attempt_245e3e8e55424a459a4cb1035e553e95",
+      "result_id": "result_0e15f6d1c56943b7834b217050404932",
+      "validation_artifact_id": "validation_d89d36b4f7dd4efd8a8294f812c66463"
     },
     "did": {
-      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
-      "attempt_id": "attempt_98c8e63c78c64c94be05ef61e0c4fc96",
-      "result_id": "result_d266df0f63d94dc4b34fef025f9efdf3",
-      "validation_artifact_id": "validation_3e8c736716df4137b72d5750e0887c2b"
+      "run_id": "run_eff36995976d4ef2bf9153e5e3f6dca8",
+      "attempt_id": "attempt_b18e78de24c3408fb55195ed6e9c7215",
+      "result_id": "result_293eca69b9dd44489f56b61baabfd4fb",
+      "validation_artifact_id": "validation_2055bdeee37749fdbb519283aabd596f"
     },
     "rdd": {
-      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
-      "attempt_id": "attempt_f6071aa1631840e6b9d14658018d6aeb",
-      "result_id": "result_29a670caf3354c4c958f7775d5437e4a",
-      "validation_artifact_id": "validation_bfe33c7cfa10491eb4295a5d6bb909aa"
+      "run_id": "run_eff36995976d4ef2bf9153e5e3f6dca8",
+      "attempt_id": "attempt_97652788132c4c3ea3f87a207b00bc6d",
+      "result_id": "result_2656e276da0f44138ce6686b7f40da95",
+      "validation_artifact_id": "validation_676bc037d1b9424e933a9a5b80fd27e7"
     },
     "logit": {
-      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
-      "attempt_id": "attempt_813b5fd422014bf58110b44be60db7d4",
-      "result_id": "result_06826ab812204065bbae93446f062d53",
-      "validation_artifact_id": "validation_ca97196f983e4308b04a24a4f654148c"
+      "run_id": "run_eff36995976d4ef2bf9153e5e3f6dca8",
+      "attempt_id": "attempt_408a7673308f491ebd5748965c3fd199",
+      "result_id": "result_724a855b6c92499d8a8b85b3397b18a8",
+      "validation_artifact_id": "validation_d590ffaa6a5742b98b3e12254639d854"
     },
     "summary": {
-      "run_id": "run_34314195f7cb4ee787879c1aa7ea0799",
-      "attempt_id": "attempt_eb8604f73d974f9fbabf4655dac998c8",
-      "result_id": "result_e302072e1b2d4fbbb61ac675234af658",
-      "validation_artifact_id": "validation_cb1451e07ffd44069cb508a5dc35e5ca"
+      "run_id": "run_eff36995976d4ef2bf9153e5e3f6dca8",
+      "attempt_id": "attempt_d164390ad2b0423c979b5beaa161f119",
+      "result_id": "result_dfc861f21ebc4347912ebbbdcb6ee2f5",
+      "validation_artifact_id": "validation_26949866d76346c5a3fbca6a95160ae4"
     }
-  },
-  "ajr_result_ids": [
-    "result_b84b62134e6541ccafd2514cb0ce5609",
-    "result_4d97e9009ad34092b604dffbddd0b794"
-  ]
+  }
 }

@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "started_at": "2026-10-10T14:28:14.179277+00:00",
+  "finished_at": "2026-10-10T14:29:21.910129+00:00",
+  "application_version": "0.1.0rc1",
+  "wheel_sha256": "d1ed1920af148c33dcbf107e110927a6cb9453a979b9d38a5dd0d4dee5f6da25",
+  "synthetic": true,
+  "scripted_confirmations": true,
+  "predefined_engineering_task": true,
+  "independent_researcher_review": "pending",
+  "run_id": "run_c66bee969c9b468faeac8921cf05a511",
+  "run_status": "COMPLETED",
+  "report": {
+    "report_id": "report_c6ebab6217c44f2bb90bc2f452d23f07",
+    "status": "complete",
+    "issue": null
+  },
+  "calls": {
+    "schema_version": 1,
+    "model_calls": 9,
+    "tool_calls": 8,
+    "model_transport_failures": 0,
+    "model_parse_failures": 0,
+    "tool_failures": 1,
+    "model_retries": 0,
+    "tool_retries": 0,
+    "unfinished_model_calls": 0,
+    "unfinished_tool_calls": 0,
+    "known_total_tokens": 99669,
+    "missing_total_usage_calls": 0
+  },
+  "export_hashes_passed": true,
+  "current_results": [
+    {
+      "result_id": "result_b98412cd4dad407aa5fc3cf1bc4329f7",
+      "experiment_id": "experiment_dfa7927fd260482887acdd06933b6c75",
+      "attempt_id": "attempt_4421d37de5224356b14c7b760e5707db",
+      "input_sha256": "e4f3c28112cea3cfdaba501463340382b5c8ee3cd16d0364dfe501dd4c1e38e5",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 399,
+        "sample_note": "实际估计样本与声明规则逐行比较；结构条件另行核验",
+        "actual_command": "regress ylinear x if included==1",
+        "estimator": "OLS",
+        "variables": [
+          "ylinear",
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "常规同方差标准误",
+          "clusters": [],
+          "explanation": "95% 区间与双侧 p 值由 Stata 计算；残差自由度的 t 推断"
+        },
+        "kind": "coefficients",
+        "estimates": [
+          {
+            "schema_version": 1,
+            "name": "x",
+            "meaning": "x 的 linear 系数",
+            "value": 1.9967755859763634,
+            "standard_error": 0.010342008080399725,
+            "confidence_interval": [
+              1.9764436383706085,
+              2.0171075335821183
+            ],
+            "p_value": 0.0,
+            "degrees_of_freedom": 397.0,
+            "missing_reasons": {}
+          },
+          {
+            "schema_version": 1,
+            "name": "_cons",
+            "meaning": "截距",
+            "value": 1.5131962812239923,
+            "standard_error": 0.01460746851098799,
+            "confidence_interval": [
+              1.484478620001024,
+              1.5419139424469606
+            ],
+            "p_value": 1.8036710676039929e-289,
+            "degrees_of_freedom": 397.0,
+            "missing_reasons": {}
+          }
+        ]
+      }
+    },
+    {
+      "result_id": "result_614c69c6a172483882aeda5ed2281cef",
+      "experiment_id": "experiment_31f121277dbd480e825e5ddccd3d7758",
+      "attempt_id": "attempt_7fe48b5c27e24b7d9a7b8b8ee1b7d851",
+      "input_sha256": "e4f3c28112cea3cfdaba501463340382b5c8ee3cd16d0364dfe501dd4c1e38e5",
+      "normalized": {
+        "schema_version": 1,
+        "sample_size": 400,
+        "sample_note": "声明条件下单变量非缺失观测",
+        "actual_command": "summarize x if included==1",
+        "estimator": "未加权描述统计",
+        "variables": [
+          "x"
+        ],
+        "sample_rule": "included==1",
+        "fixed_effects": [],
+        "standard_errors": {
+          "schema_version": 1,
+          "treatment": "不适用",
+          "clusters": [],
+          "explanation": "样本标准差不是均值标准误；当前结果不提供推断"
+        },
+        "kind": "scalars",
+        "values": [
+          {
+            "schema_version": 1,
+            "name": "N",
+            "value": 400.0,
+            "meaning": "非缺失样本量",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "mean",
+            "value": 0.0,
+            "meaning": "均值",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "sd",
+            "value": 1.4159846508095772,
+            "meaning": "样本标准差",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "min",
+            "value": -2.0,
+            "meaning": "最小值",
+            "missing_reason": null
+          },
+          {
+            "schema_version": 1,
+            "name": "max",
+            "value": 2.0,
+            "meaning": "最大值",
+            "missing_reason": null
+          }
+        ]
+      }
+    }
+  ],
+  "code_sha256": {
+    "stata_contracts.py": "2b3a010f814df141422bb9761388389e13b5e1088f3cc658414ac009e5b6a2f6",
+    "paper_contracts.py": "1e720117d2983dd70bb8a19ac672ce186985e6812e57e75940655e45969f2ad0",
+    "harness.py": "581e31f4e11b6be7c1732bd3724c05d8cb177323de196f78a3f422f82749a20e",
+    "config.py": "ca5a7b1d604a52c218a39ca7f210f5e0efcee941f2423dbed390ca1b7a7e91b3",
+    "recovery.py": "16913a1920706c5eafcbe0cec879427b6060fa7965ba281efd6eda25510b5dbd",
+    "interaction.py": "f32d6047621cb5c3c2650d0a5ca558e88090656e18250e5715f529c9df2f6391",
+    "stata_backend.py": "931e99bb4da0a54756139455118833e8abc701cd7d98373e7db941a66a5150a9",
+    "diagnostics.py": "89dc0931c72f824bdcd9b9260fa7edf9cea1e6e4d5f465a1ef537e14d5c84adb",
+    "model_client.py": "faac344d8c5148322f5a1ba21a465379addb818a330d8ca6412fdc83223e449f",
+    "stata_results.py": "8a3367e5a51435f66fb43aa568680ba25dcf2c9508c18694eb91de42edd6456b",
+    "ports.py": "65dbd15255f57df2345eb587365d1b27307f935d0fe552695d6ad91ce11f15d9",
+    "stata_methods.py": "cf4472e795a2e16fd613781498cd620f3cee74005f1c2d0bd73e4a355e71eaeb",
+    "session.py": "30b3d1208124e3add964192612a15ad56cffa484387874aa506a913a7a390275",
+    "__init__.py": "49afb54ffbfe3bc6cacd2166162717eec3e621ae6d26a7701edd8a5f4730a941",
+    "review.py": "0e5e3e40542619197764ee983bb0258c546add3c7851700c680aac467c4ce399",
+    "stata_transport.py": "a78e5a47015b3cf3f97c6ac611f563f3611112e9c4e8c71de5b3986486779876",
+    "exporting.py": "c26103e1ea4d309bc7fe14f960808628bd3ce2268f658da4d3e9c333075ea689",
+    "processes.py": "fb157e4e02856069faae498c55402ceb7c9bd5d018ce2d3571b505873a259de6",
+    "inputs.py": "6167a743025074596920387d2b653347ef5f227419838569eeac47831bb9c338",
+    "schemas.py": "b18fd97a5fa5a7680ceae6c7ff34878e6afe0270a825500ec6de811f5ac02dd4",
+    "cli.py": "34dd152f4987a1276b5e804f44d837e37d6618cca4c0b70538df183ea17ff760",
+    "migrations.py": "c8eadeaec02044e20f17b2cda431f68f81bf303e009a2e703bc746632da936c5",
+    "inference.py": "1185ebb50536ba697bcbf2661ec792261b60658fed95deec9ed663c012a24fed",
+    "stata_mcp.py": "b4dd9d9f19ccc2a9dd544061f1c25f5eb293a9058ab22b69d1f204d270c95485",
+    "state.py": "e3b3d6832db55be5a0fd7788e09581c92ce267956ce6c63af94cad69accab65f",
+    "reporting.py": "2f08d3a2329ab842d068c06b1967021510b34272c178e5727b1319f07edec816"
+  },
+  "review_batches": [
+    {
+      "parent_tool_call_id": "tool_54e4260a85ba419eb354bd68000daac6",
+      "model_call_ids": [
+        "model_4a8a6780dbe24b3d8bd8993c310e1d7d",
+        "model_4026b3a17a3e4f25b3a9f222f42e829a"
+      ],
+      "overlap_seconds": 4.70552,
+      "both_valid": true
+    }
+  ],
+  "analyses": [
+    {
+      "purpose": "估计 included==1 观测中 ylinear 对 x 的含截距 OLS 斜率与截距，常规标准误。",
+      "initiation": "planned",
+      "based_on_result_ids": [],
+      "workers_stopped": true
+    },
+    {
+      "purpose": "对解释变量 x 在 included==1 子样本内做无权重描述统计，作为配套分布信息，用于解释主回归斜率所对应处理强度范围。",
+      "initiation": "planned",
+      "based_on_result_ids": [
+        "result_b98412cd4dad407aa5fc3cf1bc4329f7"
+      ],
+      "workers_stopped": true
+    }
+  ],
+  "tool_errors": [
+    {
+      "tool_name": "run_analysis",
+      "error_category": "arguments",
+      "arguments_status": "fail",
+      "error_summary": "新分析已达到研究轮次预算，可基于已有结果结束或询问研究者"
+    }
+  ]
+}

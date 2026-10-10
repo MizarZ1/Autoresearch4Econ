@@ -865,7 +865,7 @@ def test_environment_manifest_is_versioned_and_preserved(store: RunStore) -> Non
         saved = connection.execute("SELECT environment_json FROM runs").fetchone()[0]
     metadata = RunEnvironment.model_validate_json(saved)
     assert metadata.schema_version == 1
-    assert metadata.application_version == "0.1.0"
+    assert metadata.application_version == "0.1.0rc1"
     assert metadata.python_version == sys.version.split()[0]
     assert metadata.analysis_backend == "stata"
     assert metadata.interaction_language == "zh-CN"

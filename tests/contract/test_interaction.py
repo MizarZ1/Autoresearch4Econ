@@ -12,7 +12,7 @@ import pytest
 from econ_agent.interaction import apply_feedback
 from econ_agent.processes import WorkerIdentity
 from econ_agent.recovery import reconcile_interrupted
-from econ_agent.schemas import CallStatus, HumanAnswer, HumanRequest, ModelCall, RunStatus
+from econ_agent.schemas import CallStatus, HumanAnswer, HumanRequest, ModelCall, RunStatus, ToolCall
 from econ_agent.session import conduct, status_summary, stop_snapshot
 from econ_agent.state import RunStore, StateConflict, new_id
 from tests.contract.test_state import confirmed, design_content, experiment, pending_attempt
@@ -306,6 +306,82 @@ async def test_recovery_missing_identity_blocks_new_execution(store: RunStore) -
         assert not controller.identities
         assert not recovered.attempt(identifier).termination_confirmed
         assert recovered.load_state().status == RunStatus.PAUSED
+
+
+@pytest.mark.parametrize("name", ["capabilities", "inspect_data", "get_method_help"])
+@pytest.mark.parametrize("dispatched", [True, False])
+async def test_query_recovery_distinguishes_dispatch_intent(
+    store: RunStore, name: str, dispatched: bool
+) -> None:
+    store.transition_run(RunStatus.RUNNING)
+    call = ToolCall(
+        tool_call_id=new_id("tool"), run_id=store.run_id, operation_id=new_id("op"), tool_name=name
+    )
+    store.record_tool_call(call)
+    if dispatched:
+        store.archive_bytes(
+            f"calls/workers/{call.tool_call_id}/intent.json",
+            b"{}",
+            kind="tool_response",
+            tool_call_id=call.tool_call_id,
+        )
+    directory = store.directory
+    store.close()
+    with RunStore.open(directory) as reopened:
+        controller = Controller("stopped")
+        issues = await reconcile_interrupted(reopened, controller)
+        assert bool(issues) == dispatched
+        assert not controller.identities
+        assert reopened.tool_call(call.tool_call_id).status == (
+            CallStatus.UNKNOWN if dispatched else CallStatus.CANCELLED
+        )
+        if not dispatched:
+            assert not await reconcile_interrupted(reopened, controller)
+
+
+async def test_feedback_respects_exhausted_time_and_keeps_pending_request(store: RunStore) -> None:
+    request = waiting(store)
+    store.archive_bytes(
+        "calls/harness/test.json",
+        json.dumps(
+            {
+                "elapsed_seconds": store.load_state().budget.max_runtime_seconds + 1,
+            }
+        ).encode(),
+        kind="tool_response",
+    )
+    transport = SequenceTransport([])
+    result = await apply_feedback(
+        store,
+        "请解释一下",
+        request_id=request.request_id,
+        design_sha256=request.target_design_sha256,
+        model=client(store, transport),
+    )
+    assert result["status"] == "pending" and not transport.requests
+    assert store.human_request(request.request_id).status == "PENDING"
+
+
+async def test_feedback_processing_time_is_counted_before_next_feedback(store: RunStore) -> None:
+    from econ_agent.reporting import elapsed_seconds
+
+    request = waiting(store)
+    store.archive_bytes("calls/harness/test.json", b'{"elapsed_seconds": 10}', kind="tool_response")
+    store.archive_bytes(
+        "calls/human/test/interpretation.json", b'{"processing_seconds": 20}', kind="tool_response"
+    )
+    assert elapsed_seconds(store) == 30
+    transport = SequenceTransport(
+        [envelope({"decision": "clarify", "explanation": "测试澄清", "clarification": "请补充"})]
+    )
+    await apply_feedback(
+        store,
+        "请解释一下",
+        request_id=request.request_id,
+        design_sha256=request.target_design_sha256,
+        model=client(store, transport),
+    )
+    assert elapsed_seconds(store) >= 30
 
 
 def test_stop_snapshot_excludes_history_and_requests(store: RunStore, tmp_path: Path) -> None:

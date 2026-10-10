@@ -60,6 +60,23 @@ def draft_from(context: dict[str, Any]) -> PaperDraft:
     )
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "本研究纳入九百九十九个国家。",
+        "样本量为六十四。",
+        "系数估计为负零点八。",
+        "标准误为零点一。",
+    ],
+)
+def test_chinese_empirical_numbers_cannot_bypass_facts(ready: RunStore, text: str) -> None:
+    context = paper_context(ready, result_tables(ready, ready.selected_results()))
+    draft = draft_from(context)
+    sections = {**draft.sections, "讨论与局限": text}
+    with pytest.raises(ValueError, match="中文经验数字"):
+        validate_draft(draft.model_copy(update={"sections": sections}), context)
+
+
 class PaperTransport:
     requests = 0
     mutate: Any = None

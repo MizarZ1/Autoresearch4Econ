@@ -6,6 +6,7 @@ import math
 import re
 from typing import Any
 
+from econ_agent.inference import check_inference
 from econ_agent.schemas import (
     CoefficientResult,
     Estimate,
@@ -17,7 +18,8 @@ from econ_agent.stata_contracts import IVSpecification, StataProgram
 
 
 def canonical_command(command: str) -> str:
-    return re.sub(r"\s+", "", command).lower()
+    # Stata 标识符区分大小写，不能把 x 与 X 或字符串条件合并。
+    return re.sub(r"\s+", "", command)
 
 
 def iv_extraction_code(iv: IVSpecification) -> str:
@@ -91,8 +93,29 @@ def extract_iv(
     if b.get("truncated") or covariance.get("truncated"):
         raise ValueError("矩阵被截断，禁止用不完整输出构造结果")
     rows = list(csv.DictReader(io.StringIO(named_csv)))
-    if not rows or len(rows) != len(b["values"][0]) or len(covariance["values"]) != len(rows):
+    size = len(iv.controls) + 2
+    names = {iv.endogenous, *iv.controls, "_cons"}
+    if (
+        len(rows) != size
+        or {row["parameter"] for row in rows} != names
+        or len(b["values"]) != 1
+        or len(b["values"][0]) != size
+        or len(covariance["values"]) != size
+        or any(len(row) != size for row in covariance["values"])
+        or e.get("rank") != size
+    ):
         raise ValueError("具名参数、系数和协方差矩阵维度不一致")
+    if not all(math.isfinite(float(x)) for row in covariance["values"] for x in row):
+        raise ValueError("协方差矩阵含非有限值")
+    for i in range(size):
+        for j in range(size):
+            if not math.isclose(
+                covariance["values"][i][j], covariance["values"][j][i], abs_tol=1e-12
+            ):
+                raise ValueError("协方差矩阵不对称")
+    n = float(e["N"])
+    if not math.isfinite(n) or n <= size or n != int(n) or e["df_r"] != n - size:
+        raise ValueError("IV 样本量或自由度与完整参数数量不一致")
     estimates = []
     for index, row in enumerate(rows):
         values = {
@@ -114,6 +137,7 @@ def extract_iv(
             raise ValueError("具名推断数值与 MCP 的原始矩阵不符")
         if values["df"] != e["df_r"] or values["n"] != e["N"]:
             raise ValueError("推断表的样本量或自由度与主估计不符")
+        check_inference(values, values["df"])
         estimates.append(
             Estimate(
                 name=row["parameter"],
