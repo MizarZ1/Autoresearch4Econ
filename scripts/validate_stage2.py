@@ -359,6 +359,9 @@ async def main() -> int:
         "real_cancel",
         "fresh_after_cancel",
     ]
+    public["environment"] = {
+        k: record["environment"][k] for k in ("mcp_version", "stata_build", "stata_library_sha256")
+    }
     (ROOT / "docs/evidence/demo_v01_iv.json").write_text(
         json.dumps(public, ensure_ascii=False, indent=2) + "\n"
     )

@@ -36,46 +36,8 @@
   },
   "environment": {
     "mcp_version": "3.3.0",
-    "server": {
-      "name": "mcp-stata",
-      "title": null,
-      "version": "3.3.0",
-      "websiteUrl": null,
-      "icons": null
-    },
-    "tools": [
-      "stata_compare_specs",
-      "stata_control",
-      "stata_discover_tests",
-      "stata_doctor",
-      "stata_estimation_plan",
-      "stata_get_help",
-      "stata_get_results",
-      "stata_get_test_results",
-      "stata_inspect_data",
-      "stata_load_data",
-      "stata_manage_graphs",
-      "stata_manage_session",
-      "stata_project_reproducibility_report",
-      "stata_publication_check",
-      "stata_read_log",
-      "stata_research_audit",
-      "stata_run",
-      "stata_run_test",
-      "stata_run_tests",
-      "stata_task_status"
-    ],
-    "service_instance_id": "mcp_ecca40a307884854a74c05216d5f240f",
     "stata_build": "18.0.185",
-    "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc",
-    "stata": {
-      "stata_version": "18\n\n. capture quietly log off _mcp_session\n\n\n\n. capture _return restore mcp_hold_649dd93b228b\n\n. capture error 198\n\n.",
-      "version": "18\n\n. capture quietly log off _mcp_session\n\n\n\n. capture _return restore mcp_hold_13aed3a31a5f\n\n. capture error 198\n\n.",
-      "flavor": "IC\n\n. capture quietly log off _mcp_session\n\n\n\n. capture _return restore mcp_hold_f28394cf990d\n\n. capture error 198\n\n.",
-      "os": "Unix\n\n. capture quietly log off _mcp_session\n\n\n\n. capture _return restore mcp_hold_630da475781e\n\n. capture error 198\n\n.",
-      "osdtl": ". capture quietly log off _mcp_session\n\n\n\n. capture _return restore mcp_hold_4a630a7e439e\n\n. capture error 198\n\n.",
-      "machine_type": "Mac (Apple Silicon)\n\n. capture quietly log off _mcp_session\n\n\n\n. capture _return restore mcp_hold_2c191e42735f\n\n. capture error 198\n\n."
-    }
+    "stata_library_sha256": "bde0bb98aad0e19350dadefe6f858e85fabb47a6e36aba5f9b1acb57e47c49cc"
   },
   "original_unchanged": true,
   "cases": {

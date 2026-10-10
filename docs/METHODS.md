@@ -18,6 +18,7 @@
 result/validation、输入和代码 hash 见：
 
 - [方法真实证据](evidence/stage7_methods.json)
+- [候选版方法重验](evidence/demo_v01_methods.json)与 [IV 重验](evidence/demo_v01_iv.json)
 - [AJR 首版证据](evidence/stage7_ajr.json)
 - [本机健康及能力实测](evidence/stage7_doctor.json)
 - [自编数值参考](../examples/methods/stata18_reference.json)与[合成来源说明](../examples/methods/README.md)
