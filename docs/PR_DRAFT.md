@@ -1,7 +1,9 @@
 # 阶段 5 草稿 PR
 
+[PR #6](http://10.13.66.18:3000/Kkkkaiyang/lab404test202610-Agent-AutoResearch4Econ/pulls/6)
+
 分支：`feat/stage5-cli` → `main`。阶段 4 的 PR #5 已合并。
-本阶段接通 CLI 与人工恢复，不自动合并；PR 地址创建后补入。
+本阶段接通 CLI 与人工恢复，保持 Gitea WIP 草稿，不自动合并。
 
 首次方案可从 `start --task` 或交互输入提出，待答时退出后 `resume` 保留原问题
 及 Stata 后端。中文自然语言或 `/revise` 保存完整新设计、展示变化再确认；
@@ -25,3 +27,5 @@ Ctrl+C 先回收在途操作再落盘，硬中断后核对专用进程 PID、出
 
 作者完成本地差异自检；独立审阅待完成。lab404Runner 按研究者授权跳过，
 远端 CI 不计为通过。论文、完整复现包和 `export` 等待阶段 6。
+
+Codex 桌面附件工具不支持此 Gitea URL；已尝试关联，使用上方直接链接审阅。
