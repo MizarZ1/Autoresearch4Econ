@@ -355,7 +355,9 @@ class RunStore:
 
     def artifacts(self, *, kind: str | None = None) -> tuple[Artifact, ...]:
         rows = self._all(
-            "SELECT artifact_id FROM artifacts" + (" WHERE kind=?" if kind else ""),
+            "SELECT artifact_id FROM artifacts"
+            + (" WHERE kind=?" if kind else "")
+            + " ORDER BY rowid",
             (kind,) if kind else (),
         )
         return tuple(self._artifact(row[0]) for row in rows)
@@ -937,6 +939,19 @@ class RunStore:
                 raise StateConflict("调用已登记的产物引用不可改写")
         self._validate_call_refs(new)
 
+    def model_calls(self) -> tuple[ModelCall, ...]:
+        """按登记顺序读取逐次请求，供上下文、预算和审计使用。"""
+        return tuple(
+            _parse(ModelCall, row[0])
+            for row in self._all("SELECT payload_json FROM model_calls ORDER BY rowid")
+        )
+
+    def tool_calls(self) -> tuple[ToolCall, ...]:
+        return tuple(
+            _parse(ToolCall, row[0])
+            for row in self._all("SELECT payload_json FROM tool_calls ORDER BY rowid")
+        )
+
     def call_summary(self) -> dict[str, JsonValue]:
         models = [
             _parse(ModelCall, r[0]) for r in self._all("SELECT payload_json FROM model_calls")
@@ -963,6 +978,16 @@ class RunStore:
             "known_total_tokens": sum(known) if known else None,
             "missing_total_usage_calls": sum(m.total_tokens is None for m in models),
         }
+
+    def attempts(self, experiment_id: str) -> tuple[Attempt, ...]:
+        self.experiment(experiment_id)
+        return tuple(
+            _parse(Attempt, row[0])
+            for row in self._all(
+                "SELECT payload_json FROM attempts WHERE experiment_id=? ORDER BY attempt_no",
+                (experiment_id,),
+            )
+        )
 
     def attempt(self, attempt_id: str) -> Attempt:
         return _parse(
