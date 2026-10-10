@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "created_at": "2026-10-09T15:26:47.557442+00:00",
-  "provenance": "Independent developer-authored do-file, no model, no MCP",
+  "created_at": "2026-10-10T06:38:23.340212+00:00",
+  "provenance": "开发者独立编写并运行的 do-file；未使用模型或 MCP",
   "data_sha256": "2b34cce21b58a3a424a804e97a134106ab7010ef936bb68b3a244d3e271af404",
-  "reference_code_sha256": "983407036f8a3f1707fba3c7658993c2de5d76ce83882ebdda1ba37e235b764d",
+  "reference_code_sha256": "9756282c5e8e919e6c96e5b89075a7d68f1fac37bae72e21066ac4e73fcfcd1d",
   "stata": {
     "version": "18",
     "flavor": "IC",
     "MP": 1.0,
     "SE": 1.0
   },
-  "inference": "Homoskedastic conventional SE; finite-sample df correction; ivregress small",
+  "inference": "同方差常规标准误；有限样本自由度修正；ivregress small",
   "legacy_modern_match": true,
   "estimates": [
     {

@@ -1,11 +1,11 @@
-## Problem and resulting behavior
+## 问题与实现后的行为
 
-## Scope and compatibility
+## 范围与兼容性
 
-## Validation
+## 验证
 
-- Offline command and result:
-- Real Stata/model evidence:
-- Remote CI status:
+- 离线检查命令和结果：
+- 真实 Stata/模型证据：
+- 远端 CI 状态或研究者授权豁免：
 
-## Remaining work and review
+## 未完成事项与审阅状态

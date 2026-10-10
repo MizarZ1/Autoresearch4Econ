@@ -1,5 +1,5 @@
-* Independent developer reference, never sent to the production model.
-* AJR (2001), Table 4 columns 1-2 and Panel C; Stata 18.
+* 开发者独立参考脚本，不注入生产模型上下文。
+* AJR（2001），Table 4 第 1、2 列与 Panel C；Stata 18。
 version 18
 args data_path output_dir
 clear all

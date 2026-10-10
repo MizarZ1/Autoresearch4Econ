@@ -1,4 +1,4 @@
-name: Offline checks
+name: 离线检查
 on:
   push:
     branches: [main, 'feat/**', 'fix/**', 'refactor/**', 'docs/**']
@@ -6,18 +6,18 @@ on:
     branches: [main]
 jobs:
   check:
-    # Verified global runner label; lab404Runner was offline at stage 0.
+    # 已核对全局 runner 标签；研究者暂时豁免该离线服务。
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install locked dependencies
+      - name: 按锁文件安装依赖
         run: |
           python -m pip install uv==0.12.3
           uv sync --locked --extra stata --group dev
-      - name: Run shared offline gate
+      - name: 运行统一离线检查
         run: uv run --locked --extra stata --group dev python scripts/check.py
-      - name: Verify installed CLI
+      - name: 验证安装后的命令行入口
         run: uv run --locked --extra stata --group dev econ-agent --version

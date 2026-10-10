@@ -1,8 +1,17 @@
-# Changelog
+# 变更记录
 
-## 0.1.0 — Stage 0 baseline
+## 未发布：阶段 1 对象与状态
 
-- Installable CLI with version and non-network configuration inspection.
-- Locked Stata MCP dependencies and shared offline quality gate.
-- Explicit live environment probes and independent AJR reference script.
-- Research-loop, persistence, resume and export remain later M1 stages.
+- 新增中文任务、动作、设计、结果形态、人工请求、调用和能力契约。
+- 新增三个小接口、九表 SQLite v1、组合外键、不可变归档与条件更新。
+- 新增设计确认幂等、逐次重试记录、精确结果选择和文件/数据库中断恢复。
+- 新增真实进程排他锁、未来格式拒读写及状态故障测试。
+- README、代码说明、LLM 提示、CLI 帮助和新增提交统一使用中文。
+- 任务 fixture 改为正式 v1 对象，路径按任务文件目录解析。
+- 生产 Stata 执行器、研究循环和完整 CLI 在后续阶段实现。
+
+## 0.1.0：阶段 0 工程基线
+
+- 可安装入口、版本查询与离线配置检查。
+- 固定 MCP 依赖、锁文件和统一本地检查。
+- 显式真实环境探测、AJR 独立参考与验收卡。

@@ -1,24 +1,29 @@
-# Development
+# 开发约定
 
-Use Python 3.11+ and the committed `uv.lock`:
+使用 Python 3.11+ 和提交的 `uv.lock`。本地与工作流共用一个离线检查入口：
 
 ```sh
 uv sync --locked --extra stata --group dev
 uv run --locked --extra stata --group dev python scripts/check.py
 ```
 
-Work on `feat/*`, `fix/*`, `refactor/*`, or `docs/*` branches. Keep changes and
-commits small; review staged diffs and the complete history before pushing.
-Never commit credentials, assignment originals or their copies, downloaded
-third-party datasets/code, runtime databases, or raw model logs. Use the existing
-`.gitignore`; do not add everything with an unchecked `git add .`.
+自然语言文档、代码注释和 docstring、终端提示、LLM 提示与新增提交说明使用
+中文。协议字段、动作名、SQL/CLI 标识及包名保持兼容。历史共享提交不重写。
 
-Unit tests and CI stay offline. Live probes are explicit commands, require local
-Stata and/or model credentials, and must be reported separately. No model calls
-or Stata initialization occur merely by importing the application or running
-`status`/`export` when those commands become available. Use ordinary SDKs only;
-the project's own code will own the research loop.
+在 `feat/*`、`fix/*`、`refactor/*` 或 `docs/*` 分支迭代，小批次提交。提交前审阅
+暂存 diff，推送前审阅待推送历史；选择性暂存。沿用 `.gitignore`，禁止提交密钥、
+题目原件及复制件、作者数据和代码、运行数据库、许可、厂商二进制及原始模型日志。
 
-Open a draft Gitea PR early; distinguish self-review, independent review, remote
-CI, real execution, and merge. Default delivery is a reviewable PR. Do not merge
-without the applicable authorization or repository policy.
+默认测试离线，合成 fixture 明确标注用途。模型或 Stata 实测通过显式命令执行，
+与离线检查分开报告。导入模块及只读存储不会初始化模型、MCP 或 Stata。
+核心流程、调度和状态由本项目掌握，SDK 只用于基础访问。
+
+优先使用已配置的本机 Stata，未经明确要求不下载官方更新包。真实执行沿用已
+验证的 do-file、单 processor 与专用会话取消策略。阶段 1 验证状态契约，生产
+执行器在阶段 2 接入；不提前增加 M2 后端或通用工作流框架。
+
+研究者在 2026-10-10 授权暂时豁免离线 runner 的远端 CI，当前开发使用本地统一
+检查；远端任务未运行完成，不记为通过。保留工作流供恢复后使用。
+
+沿用现有 Gitea 草稿 PR，记录作者自检、独立审阅、CI、真实执行和合并状态。
+独立审阅未执行时明确标注待完成，默认交付可审查的 PR，不自动合并。

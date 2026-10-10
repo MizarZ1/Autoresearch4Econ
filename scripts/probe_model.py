@@ -1,4 +1,4 @@
-"""Explicit live API probe; three tiny calls, no research data transmitted."""
+"""显式模型接口探测；发送三次小型中文请求，不发送研究数据。"""
 
 import asyncio
 import json
@@ -32,7 +32,7 @@ async def main() -> int:
         "calls": [],
     }
     if not config.api_key():
-        record.update(status="unverified", reason="missing key")
+        record.update(status="unverified", reason="缺少模型密钥")
         output.write_text(json.dumps(record, indent=2) + "\n")
         return 1
     async with AsyncOpenAI(
@@ -47,9 +47,12 @@ async def main() -> int:
                     messages=[
                         {
                             "role": "system",
-                            "content": 'Return JSON only: {"action":"finish","message":"ok"}.',
+                            "content": '只返回 JSON：{"action":"finish","message":"验证通过"}。',
                         },
-                        {"role": "user", "content": f"Environment probe {index}; return JSON."},
+                        {
+                            "role": "user",
+                            "content": f"环境探测第 {index} 次；请用中文返回规定的 JSON。",
+                        },
                     ],
                     response_format={"type": "json_object"},
                     max_tokens=128,
@@ -62,7 +65,7 @@ async def main() -> int:
                     usage=response.usage.model_dump() if response.usage else None,
                 )
             except Exception as exc:
-                # Exception bodies may contain credentials. Persist only type and HTTP status.
+                # 异常正文可能包含凭证，只持久化异常类型和 HTTP 状态。
                 item.update(
                     status="failed",
                     error_type=type(exc).__name__,

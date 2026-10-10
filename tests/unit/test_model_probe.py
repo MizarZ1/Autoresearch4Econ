@@ -1,4 +1,4 @@
-"""The environment probe validates action shape, independently of API access."""
+"""独立于网络访问的模型探测动作校验。"""
 
 import pytest
 from pydantic import ValidationError

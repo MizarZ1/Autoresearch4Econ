@@ -1,4 +1,4 @@
-"""Explicit live MCP/Stata preflight, using only generic execution tools."""
+"""显式 MCP/Stata 探测，只使用通用执行工具。"""
 
 import asyncio
 import hashlib
@@ -24,7 +24,7 @@ OUTPUT = ROOT / "local_reference/m0/mcp_runs" / datetime.now(UTC).strftime("%Y%m
 def envelope(result: CallToolResult) -> dict[str, Any]:
     payload = result.structuredContent
     if not isinstance(payload, dict) or not isinstance(payload.get("result"), dict):
-        raise ValueError("Unexpected MCP envelope from pinned 3.3.0 server")
+        raise ValueError("固定版本 3.3.0 的 MCP 返回封套不符合预期")
     return dict(payload["result"])
 
 
@@ -157,7 +157,7 @@ async def main() -> int:
                 help_result = await call("stata_get_help", {"topic": "ivregress"})
                 record["help_success"] = help_result["success"]
                 assert record["help_success"]
-                # A real CPU loop; cancellation must interrupt execution before its sentinel.
+                # 使用真实 CPU 循环验证取消，不把任务状态当作底层计算已停止的证据。
                 await call("stata_manage_session", {"action": "stop"})
                 active_session = "cancel"
                 await call("stata_manage_session", {"action": "create"})
@@ -184,7 +184,7 @@ async def main() -> int:
                 deadline = time.monotonic() + 10
                 while not started_marker.exists():
                     if time.monotonic() > deadline:
-                        raise TimeoutError("Background computation did not actually start")
+                        raise TimeoutError("后台计算未实际开始")
                     await asyncio.sleep(0.05)
                 record["computation_started_before_cancel"] = True
                 before_cancel = await call("stata_task_status", {"task_id": task_id})
@@ -199,8 +199,8 @@ async def main() -> int:
                 record["cancel_error"] = after_cancel["data"].get("error")
                 assert record["cancel_status"] == "failed"
                 assert record["cancel_error"] == "Operation cancelled"
-                # Stata 18 lacks the sfi.breakIn hook expected by this server.
-                # Task cancellation alone does not prove process termination.
+                # Stata 18 缺少服务尝试使用的 sfi.breakIn 接口。
+                # 取消任务之后还必须确认工作进程已退出。
                 stopped = await call("stata_manage_session", {"action": "stop"})
                 assert stopped["success"]
                 try:
@@ -208,10 +208,8 @@ async def main() -> int:
                 except ProcessLookupError:
                     record["worker_process_terminated"] = True
                 else:
-                    raise RuntimeError("Cancelled Stata worker is still alive")
-                record["cancellation_strategy"] = (
-                    "cancel task, then stop session and verify worker exit"
-                )
+                    raise RuntimeError("取消后的 Stata 工作进程仍在运行")
+                record["cancellation_strategy"] = "取消任务，停止专用会话并确认工作进程退出"
                 record["soft_cancel_supported"] = False
                 active_session = "fresh"
                 restarted = await call("stata_manage_session", {"action": "create"})
@@ -225,8 +223,8 @@ async def main() -> int:
                 assert record["input_unchanged"]
                 await call("stata_manage_session", {"action": "stop"})
     record["status"] = "passed"
-    record["session_strategy"] = "fresh dedicated worker for each execution attempt"
-    record["analysis_input"] = "saved do-file through stata_run is_file=true"
+    record["session_strategy"] = "每项执行尝试使用新的专用工作进程"
+    record["analysis_input"] = "保存 do-file 后通过 stata_run 的 is_file=true 执行"
     record["finished_at"] = datetime.now(UTC).isoformat()
     (OUTPUT / "probe.json").write_text(json.dumps(record, indent=2) + "\n")
     (ROOT / "local_reference/m0/stata_probe.json").write_text(json.dumps(record, indent=2) + "\n")
@@ -247,6 +245,6 @@ if __name__ == "__main__":
             json.dumps(failed, indent=2) + "\n"
         )
         (OUTPUT / "failure.log").write_text(traceback.format_exc())
-        print(f"Stata/MCP probe failed; diagnostics: {OUTPUT.relative_to(ROOT)}")
+        print(f"Stata/MCP 探测失败，诊断目录：{OUTPUT.relative_to(ROOT)}")
         code = 1
     raise SystemExit(code)

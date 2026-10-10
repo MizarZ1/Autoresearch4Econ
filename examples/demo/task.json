@@ -1,20 +1,20 @@
 {
   "schema_version": 1,
   "analysis_backend": "stata",
-  "data_path": "examples/demo/data/maketable4.dta",
-  "research_goal": "研究制度保护指标与收入水平的关系，比较 OLS 与 IV，报告工具变量前提与局限。",
-  "materials": [
-    "examples/demo/materials/data_dictionary.md",
-    "examples/demo/materials/research_background.md"
+  "data_path": "data/maketable4.dta",
+  "dictionary_path": "materials/data_dictionary.md",
+  "material_paths": [
+    "materials/research_background.md"
   ],
-  "initial_scope": {
-    "sample": "baseco == 1",
-    "outcome": "logpgp95",
-    "endogenous_variable": "avexpr",
-    "instrument": "logem4",
-    "controls": [],
-    "inference": "conventional homoskedastic SE, finite-sample degrees of freedom"
-  },
-  "requires_design_confirmation": true,
-  "note": "Stage 0 task fixture; start command is not implemented yet. Reference directory is not model input."
+  "research_goal": "在 baseco == 1 的样本中研究制度保护 avexpr 与收入 logpgp95 的关系，比较 OLS 和以 logem4 为工具的 IV；采用同方差常规标准误与有限样本修正，说明识别假设及局限。",
+  "expected_findings": null,
+  "output_language": "zh-CN",
+  "max_research_rounds": 3,
+  "budget": {
+    "schema_version": 1,
+    "max_research_rounds": 3,
+    "max_model_calls": 20,
+    "max_tool_calls": 30,
+    "max_runtime_seconds": 1800
+  }
 }

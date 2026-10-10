@@ -1,4 +1,4 @@
-"""Run an independent Stata reference in a credential-free child process."""
+"""在不继承模型凭证的子进程中运行独立 Stata 参考。"""
 
 import csv
 import hashlib
@@ -19,10 +19,10 @@ def main() -> int:
     output = ROOT / "local_reference/m0/independent" / datetime.now(UTC).strftime("%Y%m%dT%H%M%S%f")
     output.mkdir(parents=True, exist_ok=True)
     if not data.exists() or hashlib.sha256(data.read_bytes()).hexdigest() != DATA_HASH:
-        print("Missing or changed AJR dataset; obtain and verify it before reference execution.")
+        print("AJR 数据缺失或改变，请先准备并校验数据后再运行参考。")
         return 1
     script = ROOT / "examples/demo/reference/ajr_reference.do"
-    # Only launch locally authored reference code; this is not a production analysis backend.
+    # 仅运行项目自编参考脚本，不作为生产分析后端。
     child_code = """
 import json,sys
 from pathlib import Path
@@ -51,10 +51,10 @@ Path(sys.argv[4]+'/completed').write_text('completed')
             check=False,
         )
     if result.returncode:
-        print("Stata reference failed; inspect local_reference/m0/independent/driver.log locally.")
+        print("独立 Stata 参考运行失败，请检查本次独立运行目录中的 driver.log。")
         return result.returncode
     if not (output / "completed").exists():
-        raise RuntimeError("Reference process did not complete")
+        raise RuntimeError("参考进程未完成")
     with (output / "results.csv").open() as stream:
         estimates = list(csv.DictReader(stream))
     with (output / "diagnostics.csv").open() as stream:
@@ -62,9 +62,9 @@ Path(sys.argv[4]+'/completed').write_text('completed')
     for row in estimates:
         for key in ("n", "coefficient", "standard_error", "df_r", "r2"):
             if not math.isfinite(float(row[key])):
-                raise ValueError(f"Nonfinite reference {key}")
+                raise ValueError(f"参考结果包含非有限数值：{key}")
         if int(float(row["n"])) != 64:
-            raise ValueError("Unexpected reference sample size")
+            raise ValueError("参考样本量不符合验收卡")
         if row["estimator"] == "ivregress":
             legacy = next(
                 r
@@ -77,16 +77,16 @@ Path(sys.argv[4]+'/completed').write_text('completed')
                 if not math.isclose(
                     float(row[key]), float(legacy[key]), rel_tol=1e-6, abs_tol=1e-7
                 ):
-                    raise ValueError(f"Legacy/modern inference mismatch: {key}")
+                    raise ValueError(f"旧命令与现代命令的推断口径不一致：{key}")
     destination = ROOT / "examples/demo/reference/independent_stata18.json"
     record = {
         "schema_version": 1,
         "created_at": datetime.now(UTC).isoformat(),
-        "provenance": "Independent developer-authored do-file, no model, no MCP",
+        "provenance": "开发者独立编写并运行的 do-file；未使用模型或 MCP",
         "data_sha256": DATA_HASH,
         "reference_code_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
         "stata": json.loads((output / "metadata.json").read_text()),
-        "inference": "Homoskedastic conventional SE; finite-sample df correction; ivregress small",
+        "inference": "同方差常规标准误；有限样本自由度修正；ivregress small",
         "legacy_modern_match": True,
         "estimates": estimates,
         "first_stage_diagnostics": diagnostics,
@@ -98,7 +98,7 @@ Path(sys.argv[4]+'/completed').write_text('completed')
             {k: record[k] for k in ("stata", "legacy_modern_match", "original_data_unchanged")}
         )
     )
-    print(f"Reference saved: {destination.relative_to(ROOT)}")
+    print(f"参考已保存：{destination.relative_to(ROOT)}")
     return 0
 
 
