@@ -1,6 +1,7 @@
 """固定的真实合成数值参考；离线回放只检验映射，不声称重新运行 Stata。"""
 
 import copy
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -32,7 +33,7 @@ from econ_agent.stata_methods import (
     verified_scopes,
 )
 from econ_agent.state import RunStore, StateConflict, new_id
-from scripts.validate_stage7 import compare, synthetic_data
+from scripts.validate_stage7 import compare
 from tests.contract.test_stata_backend import FakeTransport, attempt
 
 REFERENCE = Path(__file__).resolve().parents[2] / "examples/methods/stata18_reference.json"
@@ -246,7 +247,14 @@ async def test_backend_selection_reextraction_and_noncoefficient_export(
     fixture = case(name)
     program = StataProgram.model_validate(fixture["program"])
     source = tmp_path / "synthetic.csv"
-    assert synthetic_data(source) == json.loads(REFERENCE.read_text())["input_sha256"]
+    # 离线回放使用冻结的数据字节，避免各平台浮点噪声生成的末位差异。
+    # 原参考输入使用 CSV 标准 CRLF；仓库示例以 LF 存储。
+    frozen = REFERENCE.parents[1] / "quickstart/synthetic.csv"
+    source.write_bytes(frozen.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+    assert (
+        hashlib.sha256(source.read_bytes()).hexdigest()
+        == json.loads(REFERENCE.read_text())["input_sha256"]
+    )
     with RunStore.create(
         tmp_path / "runs", ResearchTask(data_path=source, research_goal="方法契约测试")
     ) as store:
