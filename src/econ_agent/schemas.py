@@ -5,7 +5,7 @@ import json
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Any, Literal, Self, cast
+from typing import Annotated, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -819,8 +819,8 @@ ResearchAction = Annotated[
     Field(discriminator="action"),
 ]
 
-# Pydantic 接收运行时 Annotated 联合；在动态入口转换，保留适配器的结果类型。
-ACTION_ADAPTER = TypeAdapter[ResearchAction](cast(Any, ResearchAction))
+# Pydantic 运行时支持 Annotated 联合；构造器的静态签名尚不能描述此类型别名。
+ACTION_ADAPTER = TypeAdapter[ResearchAction](ResearchAction)  # type: ignore[arg-type]
 
 
 class ModelFailure(Contract):
