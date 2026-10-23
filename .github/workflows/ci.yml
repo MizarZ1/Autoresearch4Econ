@@ -26,5 +26,7 @@ jobs:
       - name: 白名单构建与仓库外安装检查
         run: |
           uv run --locked --extra stata --group dev python scripts/build_release.py
+          uv venv --python .venv/bin/python "$RUNNER_TEMP/econ-agent-dependencies"
+          uv pip install --python "$RUNNER_TEMP/econ-agent-dependencies/bin/python" --require-hashes -r output/releases/demoV0.1-test/requirements-stata.txt
           uv run --locked --extra stata --group dev python scripts/validate_install.py --packages output/releases/demoV0.1-test
           uv run --locked --extra stata --group dev python scripts/build_release.py --finalize
