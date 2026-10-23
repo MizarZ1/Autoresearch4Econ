@@ -1,4 +1,4 @@
-"""开发机与 Gitea 工作流共用的离线检查入口。"""
+"""开发机与 CI 工作流共用的离线检查入口。"""
 
 import subprocess
 import sys

@@ -25,7 +25,7 @@ packages = ["src/econ_agent"]
 include = [
   "/src/econ_agent", "/scripts", "/tests", "/docs", "/examples/methods",
   "/examples/quickstart", "/examples/demo/materials", "/examples/demo/reference",
-  "/examples/demo/task.json", "/examples/demo/sources.json", "/.gitea",
+  "/examples/demo/task.json", "/examples/demo/sources.json", "/.gitea", "/.github",
   "/README.md", "/CONTRIBUTING.md", "/CHANGELOG.md", "/AGENTS.md",
   "/.env.example", "/.gitignore", "/pyproject.toml", "/uv.lock",
 ]
@@ -41,6 +41,12 @@ select = ["E", "F", "I", "UP", "B"]
 python_version = "3.11"
 strict = true
 files = ["src", "scripts", "tests"]
+
+# schemas 中的 Pydantic 联合入口在 macOS 需忽略 arg-type，Linux 类型签名则可接受。
+# 仅允许此模块的跨平台忽略项冗余，不关闭任何实际类型错误检查。
+[[tool.mypy.overrides]]
+module = "econ_agent.schemas"
+warn_unused_ignores = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests/unit", "tests/contract"]

@@ -1,5 +1,8 @@
 # econ-agent
 
+当前开发仓库：[MizarZ1/Autoresearch4Econ](https://github.com/MizarZ1/Autoresearch4Econ)。
+历史迁移范围、PR 档案和待补项见[迁移说明](docs/GITHUB_MIGRATION.md)。
+
 通过 Stata MCP 开展实证经济研究的中文 Python 命令行项目。M1 阶段 0–7 已接入
 真实执行、自有研究循环、有界审阅、人工恢复、论文与复现包及优先方法映射。
 当前候选版本为 **demoV0.1-test / 0.1.0rc1**，使用本机 Stata，不使用 Docker。
@@ -27,8 +30,9 @@ uv run --locked --extra stata --group dev python scripts/check.py
 读取 `.env`；密钥继续使用本机环境变量，禁止提交、写入任务文件或数据库。
 
 统一本地检查依次运行格式检查、Ruff、严格 mypy、离线单元与契约测试以及安装
-入口。研究者已在 2026-10-10 授权暂时跳过离线 runner 的远端 CI，当前开发不
-等待该服务。工作流配置保留，远端执行、独立审阅与合并状态分别记录。
+入口。GitHub Actions 使用 `.github/workflows/ci.yml` 运行同一套离线检查和安装包
+检查，不需要 Stata、模型密钥或私有数据。2026-10-10 的 runner 豁免针对旧 Gitea
+环境；GitHub 远端执行、独立审阅与合并状态分别记录。
 
 ## 阶段 1 的存储 API
 

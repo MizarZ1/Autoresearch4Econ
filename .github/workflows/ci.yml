@@ -1,0 +1,32 @@
+name: 离线检查
+on:
+  push:
+    branches: [main, 'codex/**', 'feat/**', 'fix/**', 'refactor/**', 'docs/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 按锁文件安装依赖
+        run: |
+          python -m pip install uv==0.12.3
+          uv sync --locked --extra stata --group dev
+      - name: 运行统一离线检查
+        run: uv run --locked --extra stata --group dev python scripts/check.py
+      - name: 验证安装后的命令行入口
+        run: uv run --locked --extra stata --group dev econ-agent --version
+      - name: 白名单构建与仓库外安装检查
+        run: |
+          uv run --locked --extra stata --group dev python scripts/build_release.py
+          uv venv --python .venv/bin/python "$RUNNER_TEMP/econ-agent-dependencies"
+          uv pip install --python "$RUNNER_TEMP/econ-agent-dependencies/bin/python" --require-hashes -r output/releases/demoV0.1-test/requirements-stata.txt
+          uv run --locked --extra stata --group dev python scripts/validate_install.py --packages output/releases/demoV0.1-test
+          uv run --locked --extra stata --group dev python scripts/build_release.py --finalize
