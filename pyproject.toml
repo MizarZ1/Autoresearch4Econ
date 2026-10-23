@@ -25,7 +25,7 @@ packages = ["src/econ_agent"]
 include = [
   "/src/econ_agent", "/scripts", "/tests", "/docs", "/examples/methods",
   "/examples/quickstart", "/examples/demo/materials", "/examples/demo/reference",
-  "/examples/demo/task.json", "/examples/demo/sources.json", "/.gitea",
+  "/examples/demo/task.json", "/examples/demo/sources.json", "/.gitea", "/.github",
   "/README.md", "/CONTRIBUTING.md", "/CHANGELOG.md", "/AGENTS.md",
   "/.env.example", "/.gitignore", "/pyproject.toml", "/uv.lock",
 ]

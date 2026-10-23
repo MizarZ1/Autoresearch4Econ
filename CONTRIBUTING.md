@@ -10,7 +10,7 @@ uv run --locked --extra stata --group dev python scripts/check.py
 自然语言文档、代码注释和 docstring、终端提示、LLM 提示与新增提交说明使用
 中文。协议字段、动作名、SQL/CLI 标识及包名保持兼容。历史共享提交不重写。
 
-在 `feat/*`、`fix/*`、`refactor/*` 或 `docs/*` 分支迭代，小批次提交。提交前审阅
+在 `codex/*`、`feat/*`、`fix/*`、`refactor/*` 或 `docs/*` 分支迭代，小批次提交。提交前审阅
 暂存 diff，推送前审阅待推送历史；选择性暂存。沿用 `.gitignore`，禁止提交密钥、
 题目原件及复制件、作者数据和代码、运行数据库、许可、厂商二进制及原始模型日志。
 
@@ -28,8 +28,10 @@ M2 后端或通用工作流框架。审阅测试用异步屏障证明同时在�
 分别标注，不冒充研究者逐字修改或另行审阅。真实中断验收脚本会运行专用 CPU
 循环并回收自己创建的进程，不用模型替身产生的数值作为真实统计证据。
 
-研究者在 2026-10-10 授权暂时豁免离线 runner 的远端 CI，当前开发使用本地统一
-检查；远端任务未运行完成，不记为通过。保留工作流供恢复后使用。
+当前远端为 GitHub，`origin` 指向 `MizarZ1/Autoresearch4Econ`；旧 Gitea 保留为
+`gitea`，未经要求不连接旧内网。GitHub Actions 使用 `.github/workflows/ci.yml`，
+PR 模板使用 `.github/PULL_REQUEST_TEMPLATE.md`。2026-10-10 的 runner 豁免仅针对
+旧 Gitea；GitHub 任务未完成时不记为通过，不将旧豁免沿用为新平台检查结果。
 
-使用对应阶段的 Gitea 草稿 PR，记录作者自检、独立审阅、CI、真实执行和合并状态。
+使用 GitHub 草稿 PR，记录作者自检、独立审阅、CI、真实执行和合并状态。
 独立审阅未执行时明确标注待完成，默认交付可审查的 PR，不自动合并。

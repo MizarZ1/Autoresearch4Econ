@@ -6,8 +6,10 @@
 - 优先复用本机已下载并配置的 Stata；未经明确要求，不下载官方 Stata 更新包。
   本机已验证的副本为 `local_reference/stata18/`，采用 do-file、`set processors 1`
   和专用会话。取消后确认底层工作进程退出，不能仅凭任务状态认定停止。
-- 研究者已授权暂时跳过离线 `lab404Runner` 的远端 CI；使用统一离线检查，
-  如实保留远端执行及独立审阅状态，不部署额外服务。
+- 当前开发平台为 GitHub：`https://github.com/MizarZ1/Autoresearch4Econ`。
+  `origin` 指向 GitHub，旧 Gitea 保留为 `gitea` 远端；未经要求不访问旧内网。
+- 研究者对旧 Gitea 离线 `lab404Runner` 的 CI 豁免保留为历史状态；
+  GitHub Actions 使用统一离线检查，如实记录远端执行及独立审阅状态，不部署额外服务。
 - 使用功能分支和中文小批次提交，选择性暂存并检查待推送历史。遵守 `.gitignore`，
   不上传题目、密钥、原作者文件、许可、厂商二进制、运行数据库或原始日志。
 - 存储及普通离线检查不启动外部服务；真实执行使用显式验收命令。
